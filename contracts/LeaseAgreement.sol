@@ -11,17 +11,20 @@ contract LeaseAgreement {
     uint256 public monthlyQuota;
     bool public bilBoydConfirmed;
     CarNFT public carNFTContract;
+    uint256 public carID;
     
+    // It is possible to get _monthlyQuota by using contract CarNFT?
     constructor(
         address payable _bilBoyd,
-        uint256 _downPayment,
         uint256 _monthlyQuota,
-        address carNFTAddress
+        address carNFTAddress,
+        uint256 _carID
     ) {
         bilBoyd = _bilBoyd;
-        downPayment = _downPayment;
+        downPayment = _monthlyQuota * 3;
         monthlyQuota = _monthlyQuota;
-        carNFTContract = CarNFT(carNFTAddress); // Reference to CarNFT contract
+        carNFTContract = CarNFT(carNFTAddress); 
+        carID = _carID;
     }
 
     function registerDeal() public payable {
