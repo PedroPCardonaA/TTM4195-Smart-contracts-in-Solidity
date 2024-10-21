@@ -8,11 +8,11 @@ import "./structs/CarStruct.sol";
 
 contract CarNFT is ERC721, Ownable {
 
-    mapping(uint256 => Car) public cars;
-    uint256 public totalSupply;
+    mapping(uint256 => Car) private cars;
+    uint256 private currentSupply;
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) Ownable(msg.sender) {
-        totalSupply = 0;
+        currentSupply = 0;
     }
 
     function mintCarNFT(
@@ -23,8 +23,8 @@ contract CarNFT is ERC721, Ownable {
         uint256 originalValue,
         uint256 mileage
     ) public onlyOwner {
-        totalSupply += 1;
-        uint256 tokenId = totalSupply; 
+        currentSupply += 1;
+        uint256 tokenId = currentSupply; 
         cars[tokenId] = Car(model, color, yearOfMatriculation, originalValue, mileage);
         _safeMint(to, tokenId);
     }
@@ -48,6 +48,10 @@ contract CarNFT is ERC721, Ownable {
     function getCarByCarID(uint256 carId) public view returns (Car memory) {
         require(cars[carId].yearOfMatriculation == 0, "CarNFT: Car does not exist");
         return cars[carId];  
+    }
+
+    function getCurrentSupply() public view returns (uint256) {
+        return currentSupply;
     }
 
     
