@@ -54,7 +54,7 @@ contract BilBoydController {
             downPayment, 
             monthlyQuota, 
             address(carNFT)
-        );
+        ); //TODO: FIX
 
         carNFT.safeTransferFrom(address(this), msg.sender, carId);
 

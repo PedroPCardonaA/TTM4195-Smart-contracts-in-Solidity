@@ -5,26 +5,41 @@ import "./CarNFT.sol";
 import "./structs/CarStruct.sol";
 
 contract LeaseAgreement {
-    address payable public bilBoyd;
-    address public customer; // Alice is our customer
-    uint256 public downPayment;
-    uint256 public monthlyQuota;
-    bool public bilBoydConfirmed;
-    CarNFT public carNFTContract;
-    uint256 public carID;
+    address payable private immutable bilBoyd;
+    address private customer; // Alice is our customer
+    uint256 private immutable downPayment;
+    uint256 private monthlyQuota;
+    bool private bilBoydConfirmed;
+    CarNFT private carNFTContract;
+    Car private carNFT;
     
     // It is possible to get _monthlyQuota by using contract CarNFT?
     constructor(
         address payable _bilBoyd,
-        uint256 _monthlyQuota,
         address carNFTAddress,
-        uint256 _carID
+        uint256 _carID,
+        uint8 _driverExperienceYears,
+        uint256 _mileageCap,
+        uint256 _newContractDuration
     ) {
-        bilBoyd = _bilBoyd;
-        downPayment = _monthlyQuota * 3;
-        monthlyQuota = _monthlyQuota;
+        bilBoyd = _bilBoyd; 
         carNFTContract = CarNFT(carNFTAddress); 
-        carID = _carID;
+        Car memory car = carNFTContract.getCarByCarID(_carID);
+
+        monthlyQuota = carNFTContract.calculateMonthlyQuota(
+            car.originalValue,
+            car.mileage,
+            _driverExperienceYears,
+            _mileageCap,
+            _newContractDuration
+        );
+
+        downPayment = monthlyQuota * 3;
+    }
+
+    modifier onlyOwner() { //TODO: util?
+        require(msg.sender == bilBoyd, "Only the owner-company can perform this action");
+        _;
     }
 
     function registerDeal() public payable {
@@ -32,8 +47,7 @@ contract LeaseAgreement {
         customer = msg.sender;
     }
 
-    function confirmDeal() public {
-        require(msg.sender == bilBoyd, "Only BilBoyd can confirm");
+    function confirmDeal() public onlyOwner {
         bilBoydConfirmed = true;
         bilBoyd.transfer(downPayment + monthlyQuota);
     }
@@ -48,12 +62,12 @@ contract LeaseAgreement {
         // Logic to terminate the lease
     }
 
-    function extendLease(
+    function extendLease (
         uint256 newContractDuration, 
         uint256 carId, 
         uint8 driverExperienceYears, 
         uint256 mileageCap
-    ) public {
+    ) public onlyOwner {
         require(msg.sender == customer, "Only customer can extend");
         // Get the car data from CarNFT contract by accessing each field individually
         Car memory car = carNFTContract.getCarByCarID(carId);
@@ -73,5 +87,41 @@ contract LeaseAgreement {
         require(msg.sender == customer, "Only customer can lease a new car");
         // Transfer new car NFT to Alice
         carNFTContract.safeTransferFrom(bilBoyd, customer, newCarId);
+    }
+
+
+    // Getter for bilBoyd
+    function getBilBoyd() public view returns (address payable) {
+        return bilBoyd;
+    }
+
+    // Getter for customer (Alice)
+    function getCustomer() public view returns (address) {
+        return customer;
+    }
+
+    // Getter for downPayment
+    function getDownPayment() public view returns (uint256) {
+        return downPayment;
+    }
+
+    // Getter for monthlyQuota
+    function getMonthlyQuota() public view returns (uint256) {
+        return monthlyQuota;
+    }
+
+    // Getter for bilBoydConfirmed
+    function isBilBoydConfirmed() public view returns (bool) {
+        return bilBoydConfirmed;
+    }
+
+    // Getter for carNFTContract
+    function getCarNFTContract() public view returns (CarNFT) {
+        return carNFTContract;
+    }
+
+    // Getter for carNFT
+    function getCarNFT() public view returns (Car memory) {
+        return carNFT;
     }
 }
