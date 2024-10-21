@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 
 import "./CarNFT.sol";
-import "./CarStruct.sol";
+import "./structs/CarStruct.sol";
 
 contract LeaseAgreement {
     address payable public bilBoyd;
-    address public alice;
+    address public customer; // Alice is our customer
     uint256 public downPayment;
     uint256 public monthlyQuota;
     bool public bilBoydConfirmed;
@@ -26,7 +26,7 @@ contract LeaseAgreement {
 
     function registerDeal() public payable {
         require(msg.value == downPayment + monthlyQuota, "Incorrect payment amount");
-        alice = msg.sender;
+        customer = msg.sender;
     }
 
     function confirmDeal() public {
@@ -36,12 +36,12 @@ contract LeaseAgreement {
     }
 
     function checkForSolvency() public view returns (bool) {
-        uint256 balance = alice.balance;
+        uint256 balance = customer.balance;
         return balance >= monthlyQuota;
     }
 
     function terminateLease() public {
-        require(msg.sender == alice, "Only Alice can terminate");
+        require(msg.sender == customer, "Only customer can terminate");
         // Logic to terminate the lease
     }
 
@@ -51,7 +51,7 @@ contract LeaseAgreement {
         uint8 driverExperienceYears, 
         uint256 mileageCap
     ) public {
-        require(msg.sender == alice, "Only Alice can extend");
+        require(msg.sender == customer, "Only customer can extend");
         // Get the car data from CarNFT contract by accessing each field individually
         Car memory car = carNFTContract.getCarByCarID(carId);
         
@@ -67,8 +67,8 @@ contract LeaseAgreement {
     }
 
     function leaseNewCar(uint256 newCarId) public {
-        require(msg.sender == alice, "Only Alice can lease a new car");
+        require(msg.sender == customer, "Only customer can lease a new car");
         // Transfer new car NFT to Alice
-        carNFTContract.safeTransferFrom(bilBoyd, alice, newCarId);
+        carNFTContract.safeTransferFrom(bilBoyd, customer, newCarId);
     }
 }

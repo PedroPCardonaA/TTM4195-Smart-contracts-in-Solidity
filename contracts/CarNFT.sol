@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "./CarStruct.sol";
+import "./structs/CarStruct.sol";
 
 contract CarNFT is ERC721, Ownable {
 
@@ -35,7 +35,7 @@ contract CarNFT is ERC721, Ownable {
         uint8 driverExperienceYears,
         uint256 mileageCap,
         uint256 contractDuration
-    ) public pure returns (uint256) {
+    ) external pure returns (uint256) {
         uint256 baseRate = originalValue / 100; 
         uint256 mileageFactor = currentMileage / mileageCap; 
         uint256 experienceFactor = driverExperienceYears > 5 ? 10 : 20; 
