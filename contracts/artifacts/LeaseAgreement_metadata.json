@@ -14,11 +14,6 @@
 					},
 					{
 						"internalType": "uint256",
-						"name": "_downPayment",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
 						"name": "_monthlyQuota",
 						"type": "uint256"
 					},
@@ -26,6 +21,11 @@
 						"internalType": "address",
 						"name": "carNFTAddress",
 						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_carID",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "nonpayable",
@@ -52,6 +52,19 @@
 						"internalType": "bool",
 						"name": "",
 						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "carID",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -325,19 +338,19 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x4e33d9e0d80d39107f5af3bf8a2ba986b1908627c2760a089db9b4f6f93852da",
+			"keccak256": "0x67ce01dbfaf39fab4d1ac30219f63071de345d137082f033cf5393e6e94cb942",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://47d2e1bda479e182f82b199dfcf8716f9554c2f64963ea39509478e7e5ca4d0e",
-				"dweb:/ipfs/QmUXwDAfSS2RShLqzYYbM85M8cwM8kMiStRuHk3HJNx1Fi"
+				"bzz-raw://2795584c5fdb576d7cab43c9eeeeb3d82e7ab6b30fd15e134c074d1dd04ef5b4",
+				"dweb:/ipfs/QmR5WeWJcHVZE879hbsnP6HQsJmwP4Q5eykroVVsR5GBV1"
 			]
 		},
 		"contracts/LeaseAgreement.sol": {
-			"keccak256": "0xbb7d4d98ff470cbfe560c3630984cd9f2c24d309c2b72572d534e8754638cdd5",
+			"keccak256": "0x1762166470df18dc0503c8724c66f8758aa6c74e076e48d80d51300316ab14a6",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b726eb3c984b6a2076bebded31053e4a8ed951a7f7d9c7384566e8c34d155579",
-				"dweb:/ipfs/QmfVezgGT7xLVW9a1urYcK2vABEyBQx5JJNu1hnsAPNDTC"
+				"bzz-raw://17a7248fa27b406a2bd5447d874c0696ac0d805a7094e29314649e7822bf7a7a",
+				"dweb:/ipfs/QmZ6V3FuDHwiFLS5Ukr4i73yaunnNEkRzTaT5D6xEFpF4g"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
