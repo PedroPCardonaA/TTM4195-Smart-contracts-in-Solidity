@@ -16,7 +16,7 @@ contract CarNFT is ERC721, Ownable {
     }
 
     function mintCarNFT(
-        address to,
+        address toCompany,
         string memory model,
         string memory color,
         uint16 yearOfMatriculation,
@@ -26,7 +26,16 @@ contract CarNFT is ERC721, Ownable {
         currentSupply += 1;
         uint256 tokenId = currentSupply; 
         cars[tokenId] = Car(model, color, yearOfMatriculation, originalValue, mileage);
-        _safeMint(to, tokenId);
+        _safeMint(toCompany, tokenId);
+    }
+
+    function leaseCarNFT(
+        address toCustomer, 
+        address company, 
+        uint256 carId
+    ) public onlyOwner {
+        require(_ownerOf(carId) == company, "CarNFT: Car already leased"); //TODO: reflect on which methods were available to use 
+        transferFrom(company, toCustomer, carId);
     }
 
     function calculateMonthlyQuota(
@@ -45,13 +54,21 @@ contract CarNFT is ERC721, Ownable {
         return quota;
     }
 
-    function getCarByCarID(uint256 carId) public view returns (Car memory) {
-        require(cars[carId].yearOfMatriculation == 0, "CarNFT: Car does not exist");
+    modifier validCarId(uint256 carId) { //TODO: util?
+         require(carId <= this.getCurrentSupply(), "CarNFT: Car does not exist"); 
+        _;
+    }
+
+    function getCarByCarID(uint256 carId) public validCarId(carId) view returns (Car memory) {
         return cars[carId];  
     }
 
     function getCurrentSupply() public view returns (uint256) {
         return currentSupply;
+    }
+
+    function checkCurrentCarNFTOwner(uint256 carId) public validCarId(carId) view  returns (address) {
+        return _ownerOf(carId);  
     }
 
     

@@ -12,6 +12,7 @@ contract LeaseAgreement {
     bool private bilBoydConfirmed;
     CarNFT private carNFTContract;
     Car private carNFT;
+    uint256 private carId;
     
     // It is possible to get _monthlyQuota by using contract CarNFT?
     constructor(
@@ -25,6 +26,7 @@ contract LeaseAgreement {
         bilBoyd = _bilBoyd; 
         carNFTContract = CarNFT(carNFTAddress); 
         Car memory car = carNFTContract.getCarByCarID(_carID);
+        carId = _carID;
 
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
             car.originalValue,
@@ -50,6 +52,7 @@ contract LeaseAgreement {
     function confirmDeal() public onlyOwner {
         bilBoydConfirmed = true;
         bilBoyd.transfer(downPayment + monthlyQuota);
+        carNFTContract.leaseCarNFT(this.getCustomer(), this.getBilBoyd(), this.getCarId());
     }
 
     function checkForSolvency() public view returns (bool) {
@@ -57,20 +60,19 @@ contract LeaseAgreement {
         return balance >= monthlyQuota;
     }
 
-    function terminateLease() public {
+    function terminateLease() public view {
         require(msg.sender == customer, "Only customer can terminate");
         // Logic to terminate the lease
     }
 
     function extendLease (
         uint256 newContractDuration, 
-        uint256 carId, 
         uint8 driverExperienceYears, 
         uint256 mileageCap
     ) public onlyOwner {
         require(msg.sender == customer, "Only customer can extend");
         // Get the car data from CarNFT contract by accessing each field individually
-        Car memory car = carNFTContract.getCarByCarID(carId);
+        Car memory car = carNFTContract.getCarByCarID(this.getCarId());
         
         // Now you can access car fields such as car.originalValue, car.mileage, etc.
         // Recompute monthly quota based on new parameters
@@ -119,9 +121,15 @@ contract LeaseAgreement {
     function getCarNFTContract() public view returns (CarNFT) {
         return carNFTContract;
     }
+    
+    // Getter for the car id
+    function getCarId() public view returns (uint256) {
+        return carId;
+    }
 
     // Getter for carNFT
     function getCarNFT() public view returns (Car memory) {
         return carNFT;
     }
+
 }
