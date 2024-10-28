@@ -16,17 +16,21 @@ contract CarNFT is ERC721, Ownable {
     }
 
     function mintCarNFT(
-        address toCompany,
         string memory model,
         string memory color,
         uint16 yearOfMatriculation,
         uint256 originalValue,
         uint256 mileage
     ) public onlyOwner {
+        require(bytes(model).length > 0, "Car model cannot be empty");
+        require(bytes(color).length > 0, "Car color cannot be empty");
+        require(yearOfMatriculation >= 1886 && yearOfMatriculation <= uint16(block.timestamp / 31556926 + 1970) +1, "Invalid year of matriculation");
+        require(originalValue > 0, "Original value must be greater than zero");
+        require(mileage >= 0, "Mileage cannot be negative");
         currentSupply += 1;
         uint256 tokenId = currentSupply; 
         cars[tokenId] = Car(model, color, yearOfMatriculation, originalValue, mileage);
-        _safeMint(toCompany, tokenId);
+        _safeMint(owner(), tokenId);
     }
 
     function leaseCarNFT(
@@ -71,5 +75,10 @@ contract CarNFT is ERC721, Ownable {
         return _ownerOf(carId);  
     }
 
+    function setMileage(uint256 carId, uint256 _mileage) public validCarId(carId) onlyOwner returns(uint256){
+        require(_mileage >= 0, "Mileage cannot be negative");
+        cars[carId].mileage = _mileage;
+        return cars[carId].mileage;
+    }
     
 }
