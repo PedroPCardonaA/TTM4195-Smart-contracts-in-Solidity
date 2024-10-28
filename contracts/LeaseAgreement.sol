@@ -3,12 +3,16 @@ pragma solidity ^0.8.0;
 
 import "./CarNFT.sol";
 import "./structs/CarStruct.sol";
+import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
-contract LeaseAgreement {
-    address payable private immutable bilBoyd;
-    address private customer; // Alice is our customer
+contract LeaseAgreement is KeeperCompatibleInterface {
+    address payable private immutable bilBoyd; //change to less specific
+    address payable private customer; // Alice is our customer
     uint256 private immutable downPayment;
     uint256 private monthlyQuota;
+    uint256 private immutable deployTime;
+    uint256 private dealRegistrationTime;
+    uint256 private registrationDeadline;
     bool private bilBoydConfirmed;
     CarNFT private carNFTContract;
     Car private carNFT;
@@ -16,14 +20,15 @@ contract LeaseAgreement {
     
     // It is possible to get _monthlyQuota by using contract CarNFT?
     constructor(
-        address payable _bilBoyd,
         address carNFTAddress,
         uint256 _carID,
         uint8 _driverExperienceYears,
         uint256 _mileageCap,
         uint256 _newContractDuration
     ) {
-        bilBoyd = _bilBoyd; 
+        deployTime = block.timestamp;
+        registrationDeadline = 10 seconds;
+        bilBoyd = payable(msg.sender); 
         carNFTContract = CarNFT(carNFTAddress); 
         Car memory car = carNFTContract.getCarByCarID(_carID);
         carId = _carID;
@@ -44,15 +49,38 @@ contract LeaseAgreement {
         _;
     }
 
-    function registerDeal() public payable {
-        require(msg.value == downPayment + monthlyQuota, "Incorrect payment amount");
-        customer = msg.sender;
+    function checkUpkeep(bytes calldata /* checkData */) external override returns (bool upkeepNeeded, bytes memory /* performData */) {
+        if(dealRegistrationTime == 0) {
+            upkeepNeeded = false;
+        } 
+        else {
+            upkeepNeeded = (block.timestamp - dealRegistrationTime) > registrationDeadline;
+        }
     }
 
+    function performUpkeep(bytes calldata /* performData */) external override {
+        if ((block.timestamp - dealRegistrationTime) > registrationDeadline ) {
+            performRefund();
+            dealRegistrationTime = 0;
+        }
+    }
+
+    // Used by the customer to register their deal offer
+    function registerDeal() public payable {
+        require(msg.value == downPayment + monthlyQuota, "Incorrect payment amount");
+        dealRegistrationTime = block.timestamp;
+        customer = payable(msg.sender);
+    }
+
+    // Used by the company to confirm that the customer's deal is accepted by the company
     function confirmDeal() public onlyOwner {
         bilBoydConfirmed = true;
         bilBoyd.transfer(downPayment + monthlyQuota);
         carNFTContract.leaseCarNFT(this.getCustomer(), this.getBilBoyd(), this.getCarId());
+    }
+
+    function performRefund() public onlyOwner {
+        customer.transfer(downPayment + monthlyQuota);
     }
 
     function checkForSolvency() public view returns (bool) {
