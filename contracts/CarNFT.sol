@@ -16,7 +16,6 @@ contract CarNFT is ERC721, Ownable {
     }
 
     function mintCarNFT(
-        address toCompany,
         string memory model,
         string memory color,
         uint16 yearOfMatriculation,
@@ -26,7 +25,7 @@ contract CarNFT is ERC721, Ownable {
         currentSupply += 1;
         uint256 tokenId = currentSupply; 
         cars[tokenId] = Car(model, color, yearOfMatriculation, originalValue, mileage);
-        _safeMint(toCompany, tokenId);
+        _safeMint(owner(), tokenId);
     }
 
     function leaseCarNFT(
@@ -69,6 +68,11 @@ contract CarNFT is ERC721, Ownable {
 
     function checkCurrentCarNFTOwner(uint256 carId) public validCarId(carId) view  returns (address) {
         return _ownerOf(carId);  
+    }
+
+    function setMileage(uint256 carId, uint256 _mileage) public validCarId(carId) onlyOwner returns(uint256){
+        cars[carId].mileage = _mileage;
+        return cars[carId].mileage;
     }
 
     
