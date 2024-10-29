@@ -19,7 +19,7 @@ contract CarNFT is ERC721, Ownable {
         string memory model,
         string memory color,
         uint16 yearOfMatriculation,
-        uint256 originalValue,
+        uint256 originalValue, // in wei
         uint256 mileage
     ) public onlyOwner {
         require(bytes(model).length > 0, "Car model cannot be empty");
@@ -43,7 +43,7 @@ contract CarNFT is ERC721, Ownable {
     }
 
     function calculateMonthlyQuota(
-        uint256 originalValue,
+        uint256 originalValue, // in wei
         uint256 currentMileage,
         uint8 driverExperienceYears,
         uint256 mileageCap,

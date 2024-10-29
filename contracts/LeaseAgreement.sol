@@ -3,12 +3,16 @@ pragma solidity ^0.8.0;
 
 import "./CarNFT.sol";
 import "./structs/CarStruct.sol";
+import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
-contract LeaseAgreement {
-    address payable private immutable bilBoyd;
-    address private customer; // Alice is our customer
+contract LeaseAgreement is KeeperCompatibleInterface {
+    address payable private immutable bilBoyd; //change to less specific
+    address payable private customer; // Alice is our customer
     uint256 private immutable downPayment;
     uint256 private monthlyQuota;
+    uint256 private immutable deployTime;
+    uint256 private dealRegistrationTime;
+    uint256 private registrationDeadline;
     bool private bilBoydConfirmed;
     CarNFT private carNFTContract;
     Car private carNFT;
@@ -16,14 +20,15 @@ contract LeaseAgreement {
     
     // It is possible to get _monthlyQuota by using contract CarNFT?
     constructor(
-        address payable _bilBoyd,
         address carNFTAddress,
         uint256 _carID,
         uint8 _driverExperienceYears,
-        uint256 _mileageCap,
+        uint256 _mileageCap, //TODO: check that mileage is higher than what is in the car
         uint256 _newContractDuration
     ) {
-        bilBoyd = _bilBoyd; 
+        deployTime = block.timestamp;
+        registrationDeadline = 10 seconds; //TODO: Change to x weeks
+        bilBoyd = payable(msg.sender); 
         carNFTContract = CarNFT(carNFTAddress); 
         Car memory car = carNFTContract.getCarByCarID(_carID);
         carId = _carID;
@@ -40,15 +45,37 @@ contract LeaseAgreement {
     }
 
     modifier onlyOwner() { //TODO: util?
-        require(msg.sender == bilBoyd, "Only the owner-company can perform this action");
+        require(msg.sender == bilBoyd, "LeaseAgreement: Only the owner-company can perform this action");
         _;
     }
 
-    function registerDeal() public payable {
-        require(msg.value == downPayment + monthlyQuota, "Incorrect payment amount");
-        customer = msg.sender;
+    function checkUpkeep(bytes calldata /* checkData */) external view override returns (bool upkeepNeeded, bytes memory /* performData */) {
+        if(dealRegistrationTime == 0) {
+            upkeepNeeded = false;
+        } 
+        else {
+            upkeepNeeded = (block.timestamp - dealRegistrationTime) > registrationDeadline;
+        }
     }
 
+    function performUpkeep(bytes calldata /* performData */) external override {
+        if ((block.timestamp - dealRegistrationTime) > registrationDeadline ) {
+            customer.transfer(downPayment + monthlyQuota);
+            dealRegistrationTime = 0;
+        }
+    }
+
+    // Used by the customer to register their deal offer
+    function registerDeal() public payable {
+        require(deployTime + 2 weeks >= block.timestamp, "LeaseAgreement: The deadline ran out");
+        require(msg.value >= downPayment + monthlyQuota, "LeaseAgreement: Incorrect payment amount");
+        dealRegistrationTime = block.timestamp;
+        uint256 difference = msg.value - (downPayment + monthlyQuota); 
+        customer = payable(msg.sender);
+        customer.transfer(difference);
+    }
+
+    // Used by the company to confirm that the customer's deal is accepted by the company
     function confirmDeal() public onlyOwner {
         bilBoydConfirmed = true;
         bilBoyd.transfer(downPayment + monthlyQuota);
@@ -61,7 +88,7 @@ contract LeaseAgreement {
     }
 
     function terminateLease() public view {
-        require(msg.sender == customer, "Only customer can terminate");
+        require(msg.sender == customer, "LeaseAgreement: Only customer can terminate");
         // Logic to terminate the lease
     }
 
@@ -70,7 +97,7 @@ contract LeaseAgreement {
         uint8 driverExperienceYears, 
         uint256 mileageCap
     ) public onlyOwner {
-        require(msg.sender == customer, "Only customer can extend");
+        require(msg.sender == customer, "LeaseAgreement: Only customer can extend");
         // Get the car data from CarNFT contract by accessing each field individually
         Car memory car = carNFTContract.getCarByCarID(this.getCarId());
         
@@ -86,7 +113,7 @@ contract LeaseAgreement {
     }
 
     function leaseNewCar(uint256 newCarId) public {
-        require(msg.sender == customer, "Only customer can lease a new car");
+        require(msg.sender == customer, "LeaseAgreement: Only customer can lease a new car");
         // Transfer new car NFT to Alice
         carNFTContract.safeTransferFrom(bilBoyd, customer, newCarId);
     }
@@ -130,6 +157,10 @@ contract LeaseAgreement {
     // Getter for carNFT
     function getCarNFT() public view returns (Car memory) {
         return carNFT;
+    }
+
+    function checkContractValue() public view returns (uint256) {
+        return address(this).balance;
     }
 
 }

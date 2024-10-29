@@ -8,11 +8,6 @@
 			{
 				"inputs": [
 					{
-						"internalType": "address payable",
-						"name": "_bilBoyd",
-						"type": "address"
-					},
-					{
 						"internalType": "address",
 						"name": "carNFTAddress",
 						"type": "address"
@@ -43,12 +38,49 @@
 			},
 			{
 				"inputs": [],
+				"name": "checkContractValue",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "checkForSolvency",
 				"outputs": [
 					{
 						"internalType": "bool",
 						"name": "",
 						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "",
+						"type": "bytes"
+					}
+				],
+				"name": "checkUpkeep",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "upkeepNeeded",
+						"type": "bool"
+					},
+					{
+						"internalType": "bytes",
+						"name": "",
+						"type": "bytes"
 					}
 				],
 				"stateMutability": "view",
@@ -229,6 +261,19 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "",
+						"type": "bytes"
+					}
+				],
+				"name": "performUpkeep",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "registerDeal",
 				"outputs": [],
@@ -270,6 +315,38 @@
 		"remappings": []
 	},
 	"sources": {
+		"@chainlink/contracts/src/v0.8/AutomationBase.sol": {
+			"keccak256": "0x5d354afa1a97dffe66094397cdcbb0c14713cf3d609d88fd8f9891010e9a351a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3613ee132e1f05b3e23955db6a849966487fab8ea33e9bb70d6f038fc48c0608",
+				"dweb:/ipfs/QmRgdumWFMX35vSrZpCCvXDTvRBVXRkexnxoZqqfnGisnZ"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/AutomationCompatible.sol": {
+			"keccak256": "0x40e5ae0eff4edd0740c1b5590d09c344f84dee031e82d5294563e99603774f80",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://24a134c3bea2e8a6ed29f109e422a9bafb3f43523235188618cf016ed86fafc8",
+				"dweb:/ipfs/QmPUGoVde38kbteT358jsskzh5spoJtUoaNZ8UJWVqP3im"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/KeeperCompatible.sol": {
+			"keccak256": "0xa5f26a85ab9a927016e27af9f1ec33f878c28d8f06cb611e7fb2e189a5336a43",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://03a963b546b80fb62d2ef16805a8acae1c17b2038d76c133f4779ec87484f9b0",
+				"dweb:/ipfs/QmWvwAFDHp5fQNPFQ5shAFh5YRNNzqLMoS5LZYDjPnydFw"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol": {
+			"keccak256": "0x67076747c6f66d8d43472a56e72879c350056bff82e069addaf9064922863340",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b738dba680a6fbc4afc85819743f13f5b7f4790ec8634c9894e1160327b11b6e",
+				"dweb:/ipfs/Qmbv3euvQppeBm2g61khcJSRMZWi78xUWzbnjKAvDBnka4"
+			]
+		},
 		"@openzeppelin/contracts/access/Ownable.sol": {
 			"keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
 			"license": "MIT",
@@ -391,19 +468,19 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x7c4b0c831b1a5e7013da1fb3277c1bfc7ef62115252499f0a3e1e60f5de5d048",
+			"keccak256": "0xb3cb7ef283fa296fd06501131b1ebdf646be5d8e6727de6aeb4cc8aa95e246ca",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://97bfa2f40f4a32caa5c45d5a4b0e10b142a69b816f3033a58b53fe3597e9302f",
-				"dweb:/ipfs/QmU4fRWXhDjQeXZsmaG87sEjeR5vYXtVBqHyERfG3xxbRh"
+				"bzz-raw://30b83a7903f7ff5315ec5ed34b2237445b58a3399f46e5cf5743800a799ed598",
+				"dweb:/ipfs/QmZTEs8LaAvC3KpuVMmaWQ1AfMW9LMeSwPD9MWvtKxFBxf"
 			]
 		},
 		"contracts/LeaseAgreement.sol": {
-			"keccak256": "0x01a247cc118a854bd71b0a1525588d07f0d3a67f3e879d415a2647f7dfc9c96d",
+			"keccak256": "0x627d991a870dd60ae2434ca09921f0b117d376efe55c045022d56f66e004a466",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://2eeb4da36adba6646c2284d8ef98ccfd54449c13ebb3bfd4fb75435f9a2b6d19",
-				"dweb:/ipfs/QmUSwqDaSDJd2hjKJZF2hJ8USeSHh8Wjhh5qYwZNEUCmCV"
+				"bzz-raw://d41fe7c56a79f5165e7e62919f07551a8a66497fafd18997cfd0d79ffc69bd5b",
+				"dweb:/ipfs/QmbPq6e2ir9uka5GxkXroeV4YyFTjrA2gtM5RbxP6jSd4z"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
