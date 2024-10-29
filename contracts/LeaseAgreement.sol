@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./CarNFT.sol";
-import "./structs/CarStruct.sol";
-import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import { CarNFT } from "./CarNFT.sol";
+import { Car } from "./structs/CarStruct.sol";
+import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 contract LeaseAgreement is KeeperCompatibleInterface {
     address payable private immutable bilBoyd; //change to less specific
@@ -32,22 +32,23 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         address carNFTAddress,
         uint256 _carID,
         uint8 _driverExperienceYears,
-        uint8 _mileageCapIndex,
-        uint8 _newContractDurationIndex
+        uint8 _newContractDurationIndex,
+        uint8 _mileageCapIndex
     ) {
         deployTime = block.timestamp;
         registrationDeadline = 10 seconds; //TODO: Change to x weeks
         bilBoyd = payable(msg.sender); 
         carNFTContract = CarNFT(carNFTAddress); 
-        Car memory car = carNFTContract.getCarByCarID(_carID);
+        carNFT = carNFTContract.getCarByCarID(_carID);
         carId = _carID;
+
 
         contractDuration = getOptionsChoice(_newContractDurationIndex, contractDurationOptions);
         mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions);
 
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
-            car.originalValue,
-            car.mileage,
+            carNFT.originalValue,
+            carNFT.mileage,
             _driverExperienceYears,
             mileageCap,
             contractDuration
