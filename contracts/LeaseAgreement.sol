@@ -16,7 +16,10 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     uint256 private confirmDate;
     uint256 private nextPaymentDate;
     bool private paidMonthlyQuota;
-    uint256 private contractDuration;
+    uint16[4] private contractDurationOptions = [1, 3, 6, 12];
+    uint16[8] private mileageCapOptions = [3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; //TODO: control contract -move to BBController
+    uint16 private contractDuration;
+    uint16 mileageCap;
     bool private bilBoydConfirmed;
     bool private extended;
     bool private terminated;
@@ -29,8 +32,8 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         address carNFTAddress,
         uint256 _carID,
         uint8 _driverExperienceYears,
-        uint256 _mileageCap, //TODO: check that mileage is higher than what is in the car
-        uint256 _newContractDuration
+        uint8 _mileageCapIndex,
+        uint8 _newContractDurationIndex
     ) {
         deployTime = block.timestamp;
         registrationDeadline = 10 seconds; //TODO: Change to x weeks
@@ -39,14 +42,16 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         Car memory car = carNFTContract.getCarByCarID(_carID);
         carId = _carID;
 
+        contractDuration = getOptionsChoice(_newContractDurationIndex, contractDurationOptions);
+        mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions);
+
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
             car.originalValue,
             car.mileage,
             _driverExperienceYears,
-            _mileageCap,
-            _newContractDuration
+            mileageCap,
+            contractDuration
         );
-        contractDuration = _newContractDuration;
         extended = false;
         terminated = false;
 
@@ -81,7 +86,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
             dealRegistrationTime = 0;
         }
 
-        else if( contractDuration == 0) {
+        else if(contractDuration == 0) {
             executeTermination();
         }
 
@@ -121,6 +126,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     function executeTermination() private notTerminated {
         bilBoyd.transfer(this.checkContractValue());
         carNFTContract.returnCarNFT(carId);
+        //update mileage to the car manually; cannot be predicted
         terminated = true;
     }
 
@@ -170,10 +176,21 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         executeTermination();
     }
 
+    function getOptionsChoice(uint8 _index, uint16[8] memory array) private view notTerminated returns (uint16) {
+        require(_index >=0 && _index < array.length, "LeaseAgreement: Invalid choice for mileage cap");
+        return array[_index];
+    }
+
+    function getOptionsChoice(uint8 _index, uint16[4] memory array) private view notTerminated returns (uint16) {
+        require(_index >=0 && _index < array.length, "LeaseAgreement: Invalid choice for contract duration");
+        return array[_index];
+    }
+
+
     function extendLease (
         uint256 newContractDuration, 
         uint8 driverExperienceYears, 
-        uint256 mileageCap
+        uint256 mileageCap //TODO: IS ALREADY AS ATTR
     ) public notTerminated onlyOwner {
         require(msg.sender == customer, "LeaseAgreement: Only customer can extend");
         // Get the car data from CarNFT contract by accessing each field individually
@@ -239,6 +256,14 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
     function checkContractValue() public view returns (uint256) {
         return address(this).balance;
+    }
+
+    function getContractDuration() public view returns (uint16) {
+        return contractDuration;
+    }
+
+    function getContractMileageCap() public view returns (uint16) {
+        return mileageCap;
     }
 
 }
