@@ -22,11 +22,11 @@ contract CarNFT is ERC721, Ownable {
         uint256 originalValue, // in wei
         uint256 mileage
     ) public onlyOwner {
-        require(bytes(model).length > 0, "Car model cannot be empty");
-        require(bytes(color).length > 0, "Car color cannot be empty");
-        require(yearOfMatriculation >= 1886 && yearOfMatriculation <= uint16(block.timestamp / 31556926 + 1970) +1, "Invalid year of matriculation");
-        require(originalValue > 0, "Original value must be greater than zero");
-        require(mileage >= 0, "Mileage cannot be negative");
+        require(bytes(model).length > 0, "CarNFT: Model cannot be empty");
+        require(bytes(color).length > 0, "CarNFT: Color cannot be empty");
+        require(yearOfMatriculation >= 1886 && yearOfMatriculation <= uint256(block.timestamp / 31556926 + 1970) +1, "CarNFT: Invalid year of matriculation");
+        require(originalValue > 0, "CarNFT: Original value must be greater than zero");
+        require(mileage >= 0, "CarNFT: Mileage cannot be negative");
         currentSupply += 1;
         uint256 tokenId = currentSupply; 
         cars[tokenId] = Car(model, color, yearOfMatriculation, originalValue, mileage);
@@ -40,6 +40,10 @@ contract CarNFT is ERC721, Ownable {
     ) public onlyOwner {
         require(_ownerOf(carId) == company, "CarNFT: Car already leased"); //TODO: reflect on which methods were available to use 
         transferFrom(company, toCustomer, carId);
+    }
+
+    function returnCarNFT(uint256 carId) external {
+        transferFrom(_ownerOf(carId), owner(), carId);
     }
 
     function calculateMonthlyQuota(
@@ -76,7 +80,7 @@ contract CarNFT is ERC721, Ownable {
     }
 
     function setMileage(uint256 carId, uint256 _mileage) public validCarId(carId) onlyOwner returns(uint256){
-        require(_mileage >= 0, "Mileage cannot be negative");
+        require(_mileage >= 0, "CarNFT: Mileage cannot be negative");
         cars[carId].mileage = _mileage;
         return cars[carId].mileage;
     }
