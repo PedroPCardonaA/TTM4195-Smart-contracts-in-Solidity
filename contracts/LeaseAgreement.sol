@@ -81,6 +81,10 @@ contract LeaseAgreement is KeeperCompatibleInterface {
             dealRegistrationTime = 0;
         }
 
+        else if( contractDuration == 0) {
+            executeTermination();
+        }
+
         else if (bilBoydConfirmed && block.timestamp >= nextPaymentDate && !paidMonthlyQuota) {
             // The customer has not paid their quota on time:
 
@@ -94,7 +98,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         }
 
         else if (bilBoydConfirmed && block.timestamp >= nextPaymentDate && paidMonthlyQuota) {
-
+            // The customer has paid their qouta on time:
             if(extended) {
                 nextPaymentDate += 20 days; 
                 extended = false;
@@ -102,12 +106,18 @@ contract LeaseAgreement is KeeperCompatibleInterface {
             else {
                 nextPaymentDate += 30 days; 
             }
+            contractDuration -= 1; 
             paidMonthlyQuota = false; 
-            //Evt: pay to bilboyd from contract
         }
 
     }
 
+    /**
+    * @notice Executes the termination process of the lease agreement.
+    * @dev Transfers the remaining contract balance to and the car NFT to the bilboyd company.
+    * Marks the contract as terminated for all functions using the `notTerminated` modifier.
+    * This function is protected by the `notTerminated` modifier to ensure it cannot be executed if the contract is already terminated.
+    */
     function executeTermination() private notTerminated {
         bilBoyd.transfer(this.checkContractValue());
         carNFTContract.returnCarNFT(carId);
@@ -133,6 +143,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         //and can pay for the next period in the next 30 days after that
         paidMonthlyQuota = false;
         carNFTContract.leaseCarNFT(this.getCustomer(), this.getBilBoyd(), this.getCarId());
+        contractDuration -= 1;
     }
 
     function checkForSolvency() private view notTerminated returns (bool) {
