@@ -38,6 +38,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "checkContractValue",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "checkForSolvency",
 				"outputs": [
 					{
@@ -70,7 +83,7 @@
 						"type": "bytes"
 					}
 				],
-				"stateMutability": "nonpayable",
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -243,13 +256,6 @@
 					}
 				],
 				"name": "leaseNewCar",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "performRefund",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -470,11 +476,11 @@
 			]
 		},
 		"contracts/LeaseAgreement.sol": {
-			"keccak256": "0xe1892d94a14bfbbc3c7f2d9cb586ff96599111b0f27ac3389253f0bafff37471",
+			"keccak256": "0x627d991a870dd60ae2434ca09921f0b117d376efe55c045022d56f66e004a466",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://536a9534fa27c2d2291d2c480d67438d98755d075ce0816247ea97fce519f4ee",
-				"dweb:/ipfs/QmPLTtLbDhzZcDFRXDxNkrmJEqdz582g1pCKfiZMaXhXZA"
+				"bzz-raw://d41fe7c56a79f5165e7e62919f07551a8a66497fafd18997cfd0d79ffc69bd5b",
+				"dweb:/ipfs/QmbPq6e2ir9uka5GxkXroeV4YyFTjrA2gtM5RbxP6jSd4z"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
