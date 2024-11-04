@@ -23,14 +23,19 @@
 						"type": "uint8"
 					},
 					{
-						"internalType": "uint256",
-						"name": "_mileageCap",
-						"type": "uint256"
+						"internalType": "uint8",
+						"name": "_newContractDurationIndex",
+						"type": "uint8"
 					},
 					{
-						"internalType": "uint256",
-						"name": "_newContractDuration",
-						"type": "uint256"
+						"internalType": "uint8",
+						"name": "_mileageCapIndex",
+						"type": "uint8"
+					},
+					{
+						"internalType": "address",
+						"name": "_company",
+						"type": "address"
 					}
 				],
 				"stateMutability": "nonpayable",
@@ -44,19 +49,6 @@
 						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "checkForSolvency",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
 					}
 				],
 				"stateMutability": "view",
@@ -114,19 +106,6 @@
 				"name": "extendLease",
 				"outputs": [],
 				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getBilBoyd",
-				"outputs": [
-					{
-						"internalType": "address payable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -197,6 +176,32 @@
 			},
 			{
 				"inputs": [],
+				"name": "getContractDuration",
+				"outputs": [
+					{
+						"internalType": "uint16",
+						"name": "",
+						"type": "uint16"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getContractMileageCap",
+				"outputs": [
+					{
+						"internalType": "uint16",
+						"name": "",
+						"type": "uint16"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "getCustomer",
 				"outputs": [
 					{
@@ -236,7 +241,20 @@
 			},
 			{
 				"inputs": [],
-				"name": "isBilBoydConfirmed",
+				"name": "getcompany",
+				"outputs": [
+					{
+						"internalType": "address payable",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "iscompanyConfirmed",
 				"outputs": [
 					{
 						"internalType": "bool",
@@ -258,6 +276,13 @@
 				"name": "leaseNewCar",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "payMonthlyQuota",
+				"outputs": [],
+				"stateMutability": "payable",
 				"type": "function"
 			},
 			{
@@ -284,7 +309,7 @@
 				"inputs": [],
 				"name": "terminateLease",
 				"outputs": [],
-				"stateMutability": "view",
+				"stateMutability": "nonpayable",
 				"type": "function"
 			}
 		],
@@ -345,14 +370,6 @@
 			"urls": [
 				"bzz-raw://b738dba680a6fbc4afc85819743f13f5b7f4790ec8634c9894e1160327b11b6e",
 				"dweb:/ipfs/Qmbv3euvQppeBm2g61khcJSRMZWi78xUWzbnjKAvDBnka4"
-			]
-		},
-		"@openzeppelin/contracts/access/Ownable.sol": {
-			"keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
-				"dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
 			]
 		},
 		"@openzeppelin/contracts/interfaces/draft-IERC6093.sol": {
@@ -468,27 +485,27 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0xb3cb7ef283fa296fd06501131b1ebdf646be5d8e6727de6aeb4cc8aa95e246ca",
+			"keccak256": "0x36ea9803b0a92441f911ac122e8931a2b77f9dbda8915ce8d333156faaa27e21",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://30b83a7903f7ff5315ec5ed34b2237445b58a3399f46e5cf5743800a799ed598",
-				"dweb:/ipfs/QmZTEs8LaAvC3KpuVMmaWQ1AfMW9LMeSwPD9MWvtKxFBxf"
+				"bzz-raw://d425ba7382b5e112d707b427a20fba0adc78e4bd88eb493653e76868cfcf4223",
+				"dweb:/ipfs/QmWXFuHA3qVWK6pFFwSngT4Bj25X9cL3QHtAa4kLjZuTNo"
 			]
 		},
 		"contracts/LeaseAgreement.sol": {
-			"keccak256": "0x627d991a870dd60ae2434ca09921f0b117d376efe55c045022d56f66e004a466",
+			"keccak256": "0x19690993ad9b23b7b09084e96107649548a61931ecd1aa01c51299ebf4896479",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://d41fe7c56a79f5165e7e62919f07551a8a66497fafd18997cfd0d79ffc69bd5b",
-				"dweb:/ipfs/QmbPq6e2ir9uka5GxkXroeV4YyFTjrA2gtM5RbxP6jSd4z"
+				"bzz-raw://0f096a7ed895e2b616852906d491b970297b296fd61a897a0de1dc0e96257a53",
+				"dweb:/ipfs/QmNZnmsrdhhJ12zfu64ZE32kQ6r2KBBJAYxJtAo8Ja4JGp"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
-			"keccak256": "0x9554754e6f3b0d5ba3844aeb7ec5f1578729fc7432c525cb41d5124bafb91880",
+			"keccak256": "0x1ca012b31c34962a9c6e3a0fbe715c722e7dcd2a5d1b45f573b65be052caf0ed",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://088f5e6fab76ab89ba27f2fc0b8303df76af1b8e05716af080f0ccf6c52a88bc",
-				"dweb:/ipfs/QmZoXCr1qbRpZV5jBRmC8GRbupiyRhjNMASXFzzRbosNhC"
+				"bzz-raw://b5ab5320c66e8644c70945552fb255d8751f65d1185c801e36b57281b43ae0c0",
+				"dweb:/ipfs/QmQUXANnaKM4PTUrZPLXo1RYuCqNAbYGNLdJF4hdh9wVjQ"
 			]
 		}
 	},
