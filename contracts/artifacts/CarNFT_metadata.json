@@ -956,11 +956,11 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x36ea9803b0a92441f911ac122e8931a2b77f9dbda8915ce8d333156faaa27e21",
+			"keccak256": "0xb0c1ff031bd48359adc6e1bd66b97e52c0a1b720319cd49d20fe2eac9ace7a64",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://d425ba7382b5e112d707b427a20fba0adc78e4bd88eb493653e76868cfcf4223",
-				"dweb:/ipfs/QmWXFuHA3qVWK6pFFwSngT4Bj25X9cL3QHtAa4kLjZuTNo"
+				"bzz-raw://0615609cce894e1ed7779c19beb540df8de3c3902f922c56c7e3b04bde4e4d42",
+				"dweb:/ipfs/QmfKeRKVZsE3SBPzhk9gFPgQdMX3zwJ428dgoCtx8r2wtk"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {

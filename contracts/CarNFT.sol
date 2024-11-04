@@ -9,6 +9,7 @@ contract CarNFT is ERC721{
 
     address private owner;
     mapping(uint256 => Car) private cars;
+    mapping(uint256 => address) public leaseAgreements;
     uint256 private currentSupply;
 
     modifier onlyOwner() {
@@ -49,12 +50,15 @@ contract CarNFT is ERC721{
         uint256 carId
     ) public /* onlyOwner*/ {
         require(_ownerOf(carId) == company, "CarNFT: Car already leased"); //TODO: reflect on which methods were available to use 
-        
         transferFrom(company, toCustomer, carId);
+        leaseAgreements[carId] = msg.sender;
     }
 
+
     function returnCarNFT(uint256 carId) external {
-        transferFrom(_ownerOf(carId), owner, carId);
+    require(leaseAgreements[carId] == msg.sender, "CarNFT: Only the associated LeaseAgreement can return the car");
+        _transfer(msg.sender, owner, carId);
+        leaseAgreements[carId] = address(0);
     }
 
     function calculateMonthlyQuota(
