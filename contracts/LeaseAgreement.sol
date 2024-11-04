@@ -8,7 +8,7 @@ import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperC
 contract LeaseAgreement is KeeperCompatibleInterface {
     address payable private immutable company; //bilBoyd
     address payable private customer; // Alice is our customer
-    uint256 private immutable downPayment;
+    uint256 private immutable downPayment; // Is interpreted as deposit and it will return when the contract is terminated
     uint256 private monthlyQuota;
     uint256 private immutable deployTime;
     uint256 private dealRegistrationTime;
@@ -128,6 +128,8 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     * This function is protected by the `notTerminated` modifier to ensure it cannot be executed if the contract is already terminated.
     */
     function executeTermination() private notTerminated {
+        // Optimistic apporach 
+        company.transfer(downPayment);
         company.transfer(this.checkContractValue());
         carNFTContract.returnCarNFT(carId);
         //update mileage to the car manually; cannot be predicted
@@ -147,7 +149,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     // Used by the company to confirm that the customer's deal is accepted by the company
     function confirmDeal() public notTerminated onlyOwner {
         companyConfirmed = true;
-        company.transfer(downPayment + monthlyQuota);
+        company.transfer(monthlyQuota);
         confirmDate = block.timestamp;
         nextPaymentDate = confirmDate + 31 days; // It is assumed that the customer is retrieving the car the next day, 
         //and can pay for the next period in the next 30 days after that
