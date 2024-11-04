@@ -125,28 +125,6 @@
 				"type": "error"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "owner",
-						"type": "address"
-					}
-				],
-				"name": "OwnableInvalidOwner",
-				"type": "error"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "account",
-						"type": "address"
-					}
-				],
-				"name": "OwnableUnauthorizedAccount",
-				"type": "error"
-			},
-			{
 				"anonymous": false,
 				"inputs": [
 					{
@@ -194,25 +172,6 @@
 					}
 				],
 				"name": "ApprovalForAll",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "previousOwner",
-						"type": "address"
-					},
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "newOwner",
-						"type": "address"
-					}
-				],
-				"name": "OwnershipTransferred",
 				"type": "event"
 			},
 			{
@@ -308,9 +267,9 @@
 				"name": "calculateMonthlyQuota",
 				"outputs": [
 					{
-						"internalType": "uint256",
+						"internalType": "uint128",
 						"name": "",
-						"type": "uint256"
+						"type": "uint128"
 					}
 				],
 				"stateMutability": "pure",
@@ -414,6 +373,37 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "getOwner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "client",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "carID",
+						"type": "uint256"
+					}
+				],
+				"name": "giveApprovement",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -478,14 +468,14 @@
 						"type": "uint16"
 					},
 					{
-						"internalType": "uint256",
+						"internalType": "uint128",
 						"name": "originalValue",
-						"type": "uint256"
+						"type": "uint128"
 					},
 					{
-						"internalType": "uint256",
+						"internalType": "uint32",
 						"name": "mileage",
-						"type": "uint256"
+						"type": "uint32"
 					}
 				],
 				"name": "mintCarNFT",
@@ -501,19 +491,6 @@
 						"internalType": "string",
 						"name": "",
 						"type": "string"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "owner",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
 					}
 				],
 				"stateMutability": "view",
@@ -536,13 +513,6 @@
 					}
 				],
 				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "renounceOwnership",
-				"outputs": [],
-				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -724,19 +694,6 @@
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "newOwner",
-						"type": "address"
-					}
-				],
-				"name": "transferOwnership",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
 			}
 		],
 		"devdoc": {
@@ -807,16 +764,6 @@
 							"tokenId": "Identifier number of a token."
 						}
 					}
-				],
-				"OwnableInvalidOwner(address)": [
-					{
-						"details": "The owner is not a valid owner account. (eg. `address(0)`)"
-					}
-				],
-				"OwnableUnauthorizedAccount(address)": [
-					{
-						"details": "The caller account is not authorized to perform an operation."
-					}
 				]
 			},
 			"events": {
@@ -847,14 +794,8 @@
 				"name()": {
 					"details": "See {IERC721Metadata-name}."
 				},
-				"owner()": {
-					"details": "Returns the address of the current owner."
-				},
 				"ownerOf(uint256)": {
 					"details": "See {IERC721-ownerOf}."
-				},
-				"renounceOwnership()": {
-					"details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
 				},
 				"safeTransferFrom(address,address,uint256)": {
 					"details": "See {IERC721-safeTransferFrom}."
@@ -876,9 +817,6 @@
 				},
 				"transferFrom(address,address,uint256)": {
 					"details": "See {IERC721-transferFrom}."
-				},
-				"transferOwnership(address)": {
-					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
 				}
 			},
 			"version": 1
@@ -905,14 +843,6 @@
 		"remappings": []
 	},
 	"sources": {
-		"@openzeppelin/contracts/access/Ownable.sol": {
-			"keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
-				"dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
-			]
-		},
 		"@openzeppelin/contracts/interfaces/draft-IERC6093.sol": {
 			"keccak256": "0x880da465c203cec76b10d72dbd87c80f387df4102274f23eea1f9c9b0918792b",
 			"license": "MIT",
@@ -1026,19 +956,19 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x6e15d56f2595b097b3d6f0113c1a60ff2cf9df28fe748028c8cac743cbe3a33a",
+			"keccak256": "0x36ea9803b0a92441f911ac122e8931a2b77f9dbda8915ce8d333156faaa27e21",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://6c44c20769337960925599452efa0fced01a3620ea4205ff97240baf30cc3bf6",
-				"dweb:/ipfs/QmcH5SE7aXyBpo9HqabFJDdULpF5A4V2JJEoNrjKLnnSfb"
+				"bzz-raw://d425ba7382b5e112d707b427a20fba0adc78e4bd88eb493653e76868cfcf4223",
+				"dweb:/ipfs/QmWXFuHA3qVWK6pFFwSngT4Bj25X9cL3QHtAa4kLjZuTNo"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
-			"keccak256": "0x9554754e6f3b0d5ba3844aeb7ec5f1578729fc7432c525cb41d5124bafb91880",
+			"keccak256": "0x1ca012b31c34962a9c6e3a0fbe715c722e7dcd2a5d1b45f573b65be052caf0ed",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://088f5e6fab76ab89ba27f2fc0b8303df76af1b8e05716af080f0ccf6c52a88bc",
-				"dweb:/ipfs/QmZoXCr1qbRpZV5jBRmC8GRbupiyRhjNMASXFzzRbosNhC"
+				"bzz-raw://b5ab5320c66e8644c70945552fb255d8751f65d1185c801e36b57281b43ae0c0",
+				"dweb:/ipfs/QmQUXANnaKM4PTUrZPLXo1RYuCqNAbYGNLdJF4hdh9wVjQ"
 			]
 		}
 	},

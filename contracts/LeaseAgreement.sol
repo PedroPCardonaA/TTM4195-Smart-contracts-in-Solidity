@@ -16,6 +16,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     uint256 private confirmDate;
     uint256 private nextPaymentDate;
     bool private paidMonthlyQuota;
+    // We are using this approah instead of enums.
     uint16[4] private contractDurationOptions = [1, 3, 6, 12];
     uint16[8] private mileageCapOptions = [3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; //TODO: control contract -move to BBController
     uint16 private contractDuration;
