@@ -493,11 +493,11 @@
 			]
 		},
 		"contracts/LeaseAgreement.sol": {
-			"keccak256": "0x19690993ad9b23b7b09084e96107649548a61931ecd1aa01c51299ebf4896479",
+			"keccak256": "0xd24ef6ce683d8e58bbda53d6aa538996189222c2ef23e68c20915f93c57e0c32",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://0f096a7ed895e2b616852906d491b970297b296fd61a897a0de1dc0e96257a53",
-				"dweb:/ipfs/QmNZnmsrdhhJ12zfu64ZE32kQ6r2KBBJAYxJtAo8Ja4JGp"
+				"bzz-raw://3f37a62bcd3d34f6153059c0e29d68feb762c8344c667d4f3cdf76768cf796bf",
+				"dweb:/ipfs/QmWCz1oDRgdSQkLJzW286TAHYmnnF6pS7JShSeN31wcZPz"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
