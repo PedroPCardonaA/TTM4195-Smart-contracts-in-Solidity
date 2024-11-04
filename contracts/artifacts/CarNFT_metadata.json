@@ -373,6 +373,19 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "getOwner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -456,7 +469,7 @@
 					},
 					{
 						"internalType": "uint128",
-						"name": "baseRate",
+						"name": "originalValue",
 						"type": "uint128"
 					},
 					{
@@ -943,11 +956,11 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x212dc36f74892111df8ee7711b9c514704c87c37be5395d85491c257b30b1e82",
+			"keccak256": "0x36ea9803b0a92441f911ac122e8931a2b77f9dbda8915ce8d333156faaa27e21",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://6582f8cfe328c99b7b691dca60e07dab45c6893059204b288e975f66e9046d1f",
-				"dweb:/ipfs/QmVkK14u7eWdrL1qfzqv7rCU3ZWaqHSHYHiuR6Eavd6ij9"
+				"bzz-raw://d425ba7382b5e112d707b427a20fba0adc78e4bd88eb493653e76868cfcf4223",
+				"dweb:/ipfs/QmWXFuHA3qVWK6pFFwSngT4Bj25X9cL3QHtAa4kLjZuTNo"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
