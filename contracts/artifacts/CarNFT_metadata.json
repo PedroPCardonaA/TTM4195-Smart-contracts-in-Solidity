@@ -430,6 +430,25 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "leaseAgreements",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "address",
 						"name": "toCustomer",
 						"type": "address"
@@ -956,19 +975,19 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0xb0c1ff031bd48359adc6e1bd66b97e52c0a1b720319cd49d20fe2eac9ace7a64",
+			"keccak256": "0x000bccbe934d5b47caaaab78645891767a94ee01aa3ec83419ace8a15c04337f",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://0615609cce894e1ed7779c19beb540df8de3c3902f922c56c7e3b04bde4e4d42",
-				"dweb:/ipfs/QmfKeRKVZsE3SBPzhk9gFPgQdMX3zwJ428dgoCtx8r2wtk"
+				"bzz-raw://ad4857247948043ce986910150872b3b1873e1bcfbda703188507eb18089690a",
+				"dweb:/ipfs/QmSPWD9udB9n3eGrSTtYzNVQWJ12mGY23FPmDYARhb5D8h"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
-			"keccak256": "0x1ca012b31c34962a9c6e3a0fbe715c722e7dcd2a5d1b45f573b65be052caf0ed",
+			"keccak256": "0x9554754e6f3b0d5ba3844aeb7ec5f1578729fc7432c525cb41d5124bafb91880",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b5ab5320c66e8644c70945552fb255d8751f65d1185c801e36b57281b43ae0c0",
-				"dweb:/ipfs/QmQUXANnaKM4PTUrZPLXo1RYuCqNAbYGNLdJF4hdh9wVjQ"
+				"bzz-raw://088f5e6fab76ab89ba27f2fc0b8303df76af1b8e05716af080f0ccf6c52a88bc",
+				"dweb:/ipfs/QmZoXCr1qbRpZV5jBRmC8GRbupiyRhjNMASXFzzRbosNhC"
 			]
 		}
 	},
