@@ -179,6 +179,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
     function terminateLease() public notTerminated {
         require(msg.sender == customer, "LeaseAgreement: Only customer can terminate");
+        require(contractDuration == 0, "LeaseAgreement: Must wait until last month to terminate lease");
         executeTermination();
     }
 
