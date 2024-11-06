@@ -44,16 +44,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     // Available contract duration and mileage options (in months)
     // We are using this instead of enums because we think it reduces the complexity
     uint16[4] private contractDurationOptions = [1, 3, 6, 12];
-    uint16[8] private mileageCapOptions = [
-        3000,
-        4000,
-        5000,
-        6000,
-        7000,
-        8000,
-        9000,
-        10000
-    ];
+    uint16[8] private mileageCapOptions = [ 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000 ];
 
     // Chosen contract duration for the current lease
     uint16 private contractDuration;
@@ -73,6 +64,10 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     Car private carNFT;
     uint256 private carId;
 
+    /**
+     * @notice Creates a new lease agreement for a car between a company and a customer.
+     * @dev The contract is deployed by the company and the car NFT is transferred to the company.
+     */
     constructor(
         address carNFTAddress,
         uint256 _carID,
@@ -88,15 +83,9 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         carNFT = carNFTContract.getCarByCarID(_carID);
         carId = _carID;
 
-        require(
-            company == carNFTContract.checkCurrentCarNFTOwner(_carID),
-            "LeaseAgreement: Car already leased"
-        );
+        require(company == carNFTContract.checkCurrentCarNFTOwner(_carID), "LeaseAgreement: Car already leased");
 
-        contractDuration = getOptionsChoice(
-            _newContractDurationIndex,
-            contractDurationOptions
-        );
+        contractDuration = getOptionsChoice(_newContractDurationIndex, contractDurationOptions);
         mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions);
 
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
@@ -112,33 +101,27 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         downPayment = monthlyQuota * 3;
     }
 
+    /// @notice Modifier to ensure that only the company can perform certain actions
     modifier onlyOwner() {
-        //TODO: util?
-        require(
-            msg.sender == company,
-            "LeaseAgreement: Only the owner-company can perform this action"
-        );
+        require( msg.sender == company, "LeaseAgreement: Only the owner-company can perform this action");
         _;
     }
 
+    /// @notice Modifier to ensure that the contract is not terminated
     modifier notTerminated() {
         require(!terminated, "LeaseAgreement: Contract terminated");
         _;
     }
 
-    function checkUpkeep(
-        bytes calldata /* checkData */
-    )
-        external
-        view
-        override
-        notTerminated
-        returns (bool upkeepNeeded, bytes memory /* performData */)
+    /**
+     * @notice Checks if the contract needs upkeep.
+     * @dev The contract needs upkeep if the deal registration deadline has passed or if the customer has not paid their monthly quota on time.
+     */
+    function checkUpkeep( bytes calldata /* checkData */) external view override notTerminated returns (
+        bool upkeepNeeded, bytes memory /* performData */
+        )
     {
-        if (
-            dealRegistrationTime != 0 &&
-            (block.timestamp - dealRegistrationTime) > registrationDeadline
-        ) {
+        if ( dealRegistrationTime != 0 && (block.timestamp - dealRegistrationTime) > registrationDeadline) {
             upkeepNeeded = true;
         }
 
@@ -147,13 +130,12 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         }
     }
 
-    function performUpkeep(
-        bytes calldata /* performData */
-    ) external override notTerminated {
-        if (
-            dealRegistrationTime != 0 &&
-            (block.timestamp - dealRegistrationTime) > registrationDeadline
-        ) {
+    /**
+     * @notice Performs the upkeep of the lease agreement.
+     * @dev If the deal registration deadline has passed, the customer's payment is trasferred back to them.
+     */
+    function performUpkeep( bytes calldata /* performData */) external override notTerminated {
+        if ( dealRegistrationTime != 0 && (block.timestamp - dealRegistrationTime) > registrationDeadline) {
             customer.transfer(downPayment + monthlyQuota);
             dealRegistrationTime = 0;
         } else if (contractDuration == 0) {
@@ -164,7 +146,6 @@ contract LeaseAgreement is KeeperCompatibleInterface {
             !paidMonthlyQuota
         ) {
             // The customer has not paid their quota on time:
-
             if (extended || !checkForSolvency()) {
                 executeTermination();
             } else {
@@ -172,11 +153,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
                 extended = true;
                 monthlyQuota += (monthlyQuota / 10); // Increase by 10%
             }
-        } else if (
-            companyConfirmed &&
-            block.timestamp >= nextPaymentDate &&
-            paidMonthlyQuota
-        ) {
+        } else if (companyConfirmed && block.timestamp >= nextPaymentDate && paidMonthlyQuota) {
             // The customer has paid their qouta on time:
             if (extended) {
                 nextPaymentDate += 20 days;
@@ -192,41 +169,40 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     /**
      * @notice Executes the termination process of the lease agreement.
      * @dev Transfers the remaining contract balance to and the car NFT to the company company.
-     * Marks the contract as terminated for all functions using the `notTerminated` modifier.
      * This function is protected by the `notTerminated` modifier to ensure it cannot be executed if the contract is already terminated.
      */
     function executeTermination() private notTerminated {
-        // Optimistic apporach
         company.transfer(downPayment);
         company.transfer(this.checkContractValue());
         carNFTContract.returnCarNFT(carId);
-        //update mileage to the car manually; cannot be predicted
         terminated = true;
     }
 
-    // Used by the customer to register their deal offer
+    /**
+     * @notice Registers a new lease agreement between the company and the customer.
+     * @dev The customer must pay the down payment and the first monthly quota to register the deal.
+     */
     function registerDeal() public payable notTerminated {
-        require(
-            deployTime + 2 weeks >= block.timestamp,
-            "LeaseAgreement: The deadline ran out"
-        );
-        require(
-            msg.value >= downPayment + monthlyQuota,
-            "LeaseAgreement: Incorrect payment amount"
-        );
+        require( deployTime + 2 weeks >= block.timestamp, "LeaseAgreement: The deadline ran out");
+        require( msg.value >= downPayment + monthlyQuota, "LeaseAgreement: Incorrect payment amount");
         dealRegistrationTime = block.timestamp;
-        uint256 difference = msg.value - (downPayment + monthlyQuota); //TODO: helper
+        uint256 difference = msg.value - (downPayment + monthlyQuota); 
         customer = payable(msg.sender);
         customer.transfer(difference);
     }
 
-    // Used by the company to confirm that the customer's deal is accepted by the company
+    /**
+     * @notice Confirms the lease agreement by the company.
+     * @dev The company confirms the deal and tran
+     * It is assumed that the customer is retrieving the car the next day,
+     * and can pay for the next period in the next 30 days. After that
+     * transfers the first monthly quota to themselves.
+     */
     function confirmDeal() public notTerminated onlyOwner {
         companyConfirmed = true;
         company.transfer(monthlyQuota);
         confirmDate = block.timestamp;
-        nextPaymentDate = confirmDate + 31 days; // It is assumed that the customer is retrieving the car the next day,
-        //and can pay for the next period in the next 30 days after that
+        nextPaymentDate = confirmDate + 31 days;
         paidMonthlyQuota = false;
         carNFTContract.leaseCarNFT(
             this.getCustomer(),
@@ -236,20 +212,22 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         contractDuration -= 1;
     }
 
+    /**
+     * @notice Checks if the customer has enough balance to pay the monthly quota.
+     * @dev The customer is considered solvent if their balance is at least 110% of the monthly quota.
+     */
     function checkForSolvency() private view notTerminated returns (bool) {
         uint256 balance = customer.balance;
         return balance >= monthlyQuota + (monthlyQuota / 10);
     }
 
+    /**
+     * @notice Pays the monthly quota for the lease agreement.
+     * @dev The customer pays the monthly quota to the contract. If the payment is higher than the monthly quota,
+     */
     function payMonthlyQuota() public payable notTerminated {
-        require(
-            msg.sender == customer,
-            "LeaseAgreement: Only customer can pay"
-        ); // Ensure that the customer is the one who is paying
-        require(
-            msg.value >= monthlyQuota,
-            "LeaseAgreement: Payment is too low"
-        );
+        require(msg.sender == customer, "LeaseAgreement: Only customer can pay");
+        require(msg.value >= monthlyQuota, "LeaseAgreement: Payment is too low");
         require(!paidMonthlyQuota, "LeaseAgreement: Lease already paid for");
 
         uint256 difference = msg.value - monthlyQuota;
@@ -261,11 +239,12 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         paidMonthlyQuota = true;
     }
 
+    /**
+     * @notice Terminates the lease agreement.
+     * @dev The customer can terminate the lease agreement at the end of the contract duration.
+     */
     function terminateLease() public notTerminated {
-        require(
-            msg.sender == customer,
-            "LeaseAgreement: Only customer can terminate"
-        );
+        require( msg.sender == customer, "LeaseAgreement: Only customer can terminate");
         executeTermination();
     }
 
