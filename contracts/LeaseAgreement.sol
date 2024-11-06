@@ -134,7 +134,6 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     /**
      * @notice Checks if the contract needs upkeep.
      * @dev The contract needs upkeep if the deal registration deadline has passed or if the customer has not paid their monthly quota on time.
-     * @param checkData The data required to check the upkeep. Required by chainlink.
      */
     function checkUpkeep(bytes calldata /* checkData */) external view notTerminated override returns (bool upkeepNeeded, bytes memory /* performData */) {
         if (dealRegistrationTime != 0 && (block.timestamp - dealRegistrationTime) > registrationDeadline) {
@@ -149,7 +148,6 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     /**
      * @notice Performs the upkeep of the lease agreement.
      * @dev If the deal registration deadline has passed, the customer's payment is trasferred back to them.
-     * @param performData The data required to perform the upkeep. Required by chainlink.
      */
     function performUpkeep( bytes calldata /* performData */) external override notTerminated {
         if ( dealRegistrationTime != 0 && (block.timestamp - dealRegistrationTime) > registrationDeadline) {
@@ -291,7 +289,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
      * @dev The customer can extend the lease agreement with new parameters such as contract duration, driver experience years, and mileage cap.
      * @param _extendedContractDurationIndex The index of the new contract duration
      * @param _extendedContractMileageCapIndex The index of the new mileage cap
-     * @param _milesExpended The number of miles expended by the customer
+     * @param _milesTotal The number of miles expended by the customer
      * @param _driverExperienceYears The number of years of driving experience of the customer
      */
     function extendLease (
