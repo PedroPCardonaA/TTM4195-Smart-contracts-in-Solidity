@@ -167,7 +167,6 @@ contract CarNFT is ERC721 {
      * @param carId ID of the car to validate
      */
     modifier validCarId(uint256 carId) {
-        //TODO: util?
         require(carId <= this.getCurrentSupply(), "CarNFT: Car does not exist");
         _;
     }
@@ -196,6 +195,31 @@ contract CarNFT is ERC721 {
      */
     function getCurrentSupply() public view returns (uint256) {
         return currentSupply;
+    }
+
+    /**
+    * @notice Retrieves a list of all available car IDs (i.e., not leased).
+    * @return Array of car IDs that are currently available for lease.
+    */
+    function getAllAvailableVehicles() public view returns (Car[] memory) {
+        uint256 availableCount = 0;
+        uint256[] memory tempAvailableCars = new uint256[](currentSupply);
+
+        // Collect available car IDs
+        for (uint256 i = 1; i <= currentSupply; i++) {
+            if (_ownerOf(i) == owner) {
+                tempAvailableCars[availableCount] = i;
+                availableCount++;
+            }
+        }
+
+        // Copy available car IDs into a new array of size equal to the amount of available cars
+        Car[] memory availableCars = new Car[](availableCount);
+        for (uint256 j = 0; j < availableCount; j++) {
+            availableCars[j] = cars[tempAvailableCars[j]];
+        }
+
+        return availableCars;
     }
 
     /**
