@@ -69,10 +69,7 @@ contract CarNFT is ERC721 {
                 uint256(block.timestamp / 31556926 + 1970) + 1,
             "CarNFT: Invalid year of matriculation"
         );
-        require(
-            originalValue > 0,
-            "CarNFT: Original value must be greater than zero"
-        );
+        require(originalValue > 0, "CarNFT: Original value must be greater than zero");
         require(mileage >= 0, "CarNFT: Mileage cannot be negative");
         currentSupply += 1;
         uint256 tokenId = currentSupply;
@@ -98,7 +95,7 @@ contract CarNFT is ERC721 {
         address company,
         uint256 carId
     ) public {
-        require(_ownerOf(carId) == company, "CarNFT: Car already leased"); //TODO: reflect on which methods were available to use
+        require(_ownerOf(carId) == company, "CarNFT: Car already leased");
         transferFrom(company, toCustomer, carId);
         leaseAgreements[carId] = msg.sender;
     }
@@ -138,9 +135,7 @@ contract CarNFT is ERC721 {
         } else {
             mileageDiscont = (baseRate * 20) / 100;
         }
-        uint256 experienceFactor = driverExperienceYears > 5
-            ? 0
-            : (baseRate * 3) / 100;
+        uint256 experienceFactor = driverExperienceYears > 5 ? 0 : (baseRate * 3) / 100;
         uint256 durationDiscount;
         if (contractDuration > 10) {
             durationDiscount = (baseRate * 3) / 100;
@@ -163,13 +158,7 @@ contract CarNFT is ERC721 {
             mileageFee = 0;
         }
 
-        uint128 quota = uint128(
-            baseRate -
-                mileageDiscont +
-                experienceFactor -
-                durationDiscount +
-                mileageFee
-        );
+        uint128 quota = uint128(baseRate - mileageDiscont + experienceFactor - durationDiscount + mileageFee);
         return quota;
     }
 

@@ -241,7 +241,8 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
     /**
      * @notice Terminates the lease agreement.
-     * @dev The customer can terminate the lease agreement at the end of the contract duration.
+     * @dev The customer can only terminate the lease agreement at the end of the contract duration
+     * after the last monthly payment has been made.
      */
     function terminateLease() public notTerminated {
         require(msg.sender == customer, "LeaseAgreement: Only customer can terminate");
@@ -249,33 +250,31 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         executeTermination();
     }
 
-    function getOptionsChoice(
-        uint8 _index,
-        uint16[8] memory array
-    ) private view notTerminated returns (uint16) {
-        require(
-            _index >= 0 && _index < array.length,
-            "LeaseAgreement: Invalid choice for mileage cap"
-        );
+    /**
+     * @notice Returns the selected option from the available choices in an array.
+     * @param _index The index of the selected option
+     * @param array The array of available choices
+     */
+    function getOptionsChoice( uint8 _index, uint16[8] memory array) private view notTerminated returns (uint16) {
+        require(_index >= 0 && _index < array.length, "LeaseAgreement: Invalid choice for mileage cap");
         return array[_index];
     }
 
-    function getOptionsChoice(
-        uint8 _index,
-        uint16[4] memory array
-    ) private view notTerminated returns (uint16) {
-        require(
-            _index >= 0 && _index < array.length,
-            "LeaseAgreement: Invalid choice for contract duration"
-        );
+    /**
+     * @notice Returns the selected option from the available choices in an array.
+     * @param _index The index of the selected option
+     * @param array The array of available choices
+     */
+    function getOptionsChoice( uint8 _index, uint16[4] memory array) private view notTerminated returns (uint16) {
+        require(_index >= 0 && _index < array.length, "LeaseAgreement: Invalid choice for contract duration");
         return array[_index];
     }
 
-    function extendLease(
-        uint256 newContractDuration,
-        uint8 driverExperienceYears,
-        uint256 mileageCap //TODO: IS ALREADY AS ATTR
-    ) public notTerminated onlyOwner {
+    /**
+     * @notice Extends the lease agreement with new parameters.
+     * @dev The customer can extend the lease agreement with new parameters such as contract duration, driver experience years, and mileage cap.
+     */
+    function extendLease( uint256 newContractDuration, uint8 driverExperienceYears, uint256 mileageCap) public notTerminated onlyOwner {
         require(
             msg.sender == customer,
             "LeaseAgreement: Only customer can extend"
@@ -294,63 +293,67 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         );
     }
 
+    /**
+     * @notice Leases a new car for the customer.
+     * @dev The customer can lease a new car by transferring the car NFT from the company to the customer.
+     */
     function leaseNewCar(uint256 newCarId) public notTerminated {
-        require(
-            msg.sender == customer,
-            "LeaseAgreement: Only customer can lease a new car"
-        );
+        require( msg.sender == customer, "LeaseAgreement: Only customer can lease a new car");
         // Transfer new car NFT to Alice
         carNFTContract.safeTransferFrom(company, customer, newCarId); //Can use leaseCarNFT
     }
 
-    // Getter for company
+    /// @notice Getter for company
     function getcompany() public view returns (address payable) {
         return company;
     }
 
-    // Getter for customer (Alice)
+    /// @notice Getter for customer (Alice)
     function getCustomer() public view returns (address) {
         return customer;
     }
 
-    // Getter for downPayment
+    /// @notice Getter for downPayment
     function getDownPayment() public view returns (uint256) {
         return downPayment;
     }
 
-    // Getter for monthlyQuota
+    /// @notice Getter for monthlyQuota
     function getMonthlyQuota() public view returns (uint256) {
         return monthlyQuota;
     }
 
-    // Getter for companyConfirmed
+    /// @notice Getter for companyConfirmed
     function iscompanyConfirmed() public view returns (bool) {
         return companyConfirmed;
     }
 
-    // Getter for carNFTContract
+    /// @notice Getter for carNFTContract
     function getCarNFTContract() public view returns (CarNFT) {
         return carNFTContract;
     }
 
-    // Getter for the car id
+    /// @notice Getter for the car id
     function getCarId() public view returns (uint256) {
         return carId;
     }
 
-    // Getter for carNFT
+    /// @notice Getter for carNFT
     function getCarNFT() public view returns (Car memory) {
         return carNFT;
     }
 
+    /// @notice Gets the balance of the contract
     function checkContractValue() public view returns (uint256) {
         return address(this).balance;
     }
 
+    /// @notice Getter for contractDuration
     function getContractDuration() public view returns (uint16) {
         return contractDuration;
     }
 
+    /// @notice Getter for mileageCap
     function getContractMileageCap() public view returns (uint16) {
         return mileageCap;
     }
