@@ -108,11 +108,8 @@ contract CarNFT is ERC721 {
      * @param carId ID of the car being returned
      */
     function returnCarNFT(uint256 carId) external {
-        require(
-            leaseAgreements[carId] == msg.sender,
-            "CarNFT: Only the associated LeaseAgreement can return the car"
-        );
-        _transfer(msg.sender, owner, carId);
+    require(leaseAgreements[carId] == msg.sender, "CarNFT: Only the associated LeaseAgreement can return the car");
+        _transfer(_ownerOf(carId), owner, carId);
         leaseAgreements[carId] = address(0);
     }
 
