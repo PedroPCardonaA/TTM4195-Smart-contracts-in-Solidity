@@ -2,26 +2,16 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-import { Car } from "./structs/CarStruct.sol";
+import "./structs/CarStruct.sol";
 
-contract CarNFT is ERC721{
+contract CarNFT is ERC721, Ownable {
 
-    address private owner;
     mapping(uint256 => Car) private cars;
     uint256 private currentSupply;
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "CarNFT: You need to be owner"); 
-        _;
-    }
-
-    function giveApprovement(address client, uint256 carID) public onlyOwner {
-        approve(client, carID);
-    }
-
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-        owner = msg.sender;
+    constructor(string memory name, string memory symbol) ERC721(name, symbol) Ownable(msg.sender) {
         currentSupply = 0;
     }
 
@@ -29,75 +19,47 @@ contract CarNFT is ERC721{
         string memory model,
         string memory color,
         uint16 yearOfMatriculation,
-        uint128 originalValue, // in wei
-        uint32 mileage
+        uint256 originalValue,
+        uint256 mileage
     ) public onlyOwner {
-        require(bytes(model).length > 0, "CarNFT: Model cannot be empty");
-        require(bytes(color).length > 0, "CarNFT: Color cannot be empty");
-        require(yearOfMatriculation >= 1886 && yearOfMatriculation <= uint256(block.timestamp / 31556926 + 1970) +1, "CarNFT: Invalid year of matriculation");
-        require(originalValue > 0, "CarNFT: Original value must be greater than zero");
-        require(mileage >= 0, "CarNFT: Mileage cannot be negative");
+        require(bytes(model).length > 0, "Car model cannot be empty");
+        require(bytes(color).length > 0, "Car color cannot be empty");
+        require(yearOfMatriculation >= 1886 && yearOfMatriculation <= uint16(block.timestamp / 31556926 + 1970) +1, "Invalid year of matriculation");
+        require(originalValue > 0, "Original value must be greater than zero");
+        require(mileage >= 0, "Mileage cannot be negative");
         currentSupply += 1;
         uint256 tokenId = currentSupply; 
         cars[tokenId] = Car(model, color, yearOfMatriculation, originalValue, mileage);
-        _mint(owner, tokenId);
+        _safeMint(owner(), tokenId);
     }
 
     function leaseCarNFT(
         address toCustomer, 
         address company, 
         uint256 carId
-    ) public /* onlyOwner*/ {
+    ) public onlyOwner {
         require(_ownerOf(carId) == company, "CarNFT: Car already leased"); //TODO: reflect on which methods were available to use 
-        
         transferFrom(company, toCustomer, carId);
     }
 
-    function returnCarNFT(uint256 carId) external {
-        transferFrom(_ownerOf(carId), owner, carId);
-    }
-
     function calculateMonthlyQuota(
-        uint256 originalValue, // in wei
+        uint256 originalValue,
         uint256 currentMileage,
         uint8 driverExperienceYears,
         uint256 mileageCap,
         uint256 contractDuration
-    ) external pure returns (uint128) {
-        uint256 mileageDiscont;
-        uint256 baseRate = originalValue / 100;
-        if (currentMileage < 1000) {
-            mileageDiscont = 0;
-        } else if (currentMileage < 10000) {
-            mileageDiscont = baseRate * 5/100;
-        } else {
-            mileageDiscont = baseRate * 20/100;
-        }
-        uint256 experienceFactor = driverExperienceYears > 5 ? 0 : baseRate * 3/100;
-        uint256 durationDiscount;
-        if (contractDuration > 10) {
-            durationDiscount = baseRate * 3/100 ;
-        } else if (contractDuration > 5) {
-            durationDiscount = baseRate * 2/100 ;
-        } else if (contractDuration > 2) {
-            durationDiscount = baseRate * 1/100 ;
-        } else {
-            durationDiscount = 0;
-        }
+    ) external pure returns (uint256) {
+        uint256 baseRate = originalValue / 100; 
+        uint256 mileageFactor = currentMileage / mileageCap; 
+        uint256 experienceFactor = driverExperienceYears > 5 ? 10 : 20; 
+        uint256 durationFactor = contractDuration / 12;
 
-        uint256 mileageFee;
-        if (mileageCap > 9000) {
-            mileageFee = baseRate * 5/100 ;
-        } else if (mileageCap > 6000) {
-            mileageFee = baseRate * 3/100 ;
-        } else if (mileageCap > 3000) {
-            mileageFee = baseRate * 2/100 ;
-        } else {
-            mileageFee = 0;
-        }
-        
-        uint128 quota = uint128(baseRate - mileageDiscont + experienceFactor - durationDiscount + mileageFee);
+        uint256 quota = baseRate + mileageFactor + experienceFactor + durationFactor;
         return quota;
+    }
+
+    function returnCarNFT(uint256 _carId, address customer, address company) public {
+        transferFrom(customer, company, _carId);
     }
 
     modifier validCarId(uint256 carId) { //TODO: util?
@@ -109,10 +71,6 @@ contract CarNFT is ERC721{
         return cars[carId];  
     }
 
-    function getOwner() public view returns (address) {
-        return owner;
-    }
-
     function getCurrentSupply() public view returns (uint256) {
         return currentSupply;
     }
@@ -122,7 +80,7 @@ contract CarNFT is ERC721{
     }
 
     function setMileage(uint256 carId, uint256 _mileage) public validCarId(carId) onlyOwner returns(uint256){
-        require(_mileage >= 0, "CarNFT: Mileage cannot be negative");
+        require(_mileage >= 0, "Mileage cannot be negative");
         cars[carId].mileage = _mileage;
         return cars[carId].mileage;
     }

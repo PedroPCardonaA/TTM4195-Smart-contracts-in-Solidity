@@ -6,7 +6,7 @@ import { Car } from "./structs/CarStruct.sol";
 import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 contract LeaseAgreement is KeeperCompatibleInterface {
-    address payable private immutable bilBoyd; //change to less specific
+    address payable private immutable company; //change to less specific
     address payable private customer; // Alice is our customer
     uint256 private immutable downPayment;
     uint256 private monthlyQuota;
@@ -21,7 +21,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     uint16[8] private mileageCapOptions = [3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]; //TODO: control contract -move to BBController
     uint16 private contractDuration;
     uint16 mileageCap;
-    bool private bilBoydConfirmed;
+    bool private companyConfirmed;
     bool private extended;
     bool private terminated;
     CarNFT private carNFTContract;
@@ -34,14 +34,16 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         uint256 _carID,
         uint8 _driverExperienceYears,
         uint8 _newContractDurationIndex,
-        uint8 _mileageCapIndex
+        uint8 _mileageCapIndex,
+        address _companyAddress
     ) {
         deployTime = block.timestamp;
         registrationDeadline = 10 seconds; //TODO: Change to x weeks
-        bilBoyd = payable(msg.sender); 
+        company = payable(_companyAddress); 
         carNFTContract = CarNFT(carNFTAddress); 
         carNFT = carNFTContract.getCarByCarID(_carID);
         carId = _carID;
+        require(msg.sender == carNFTContract.checkCurrentCarNFTOwner(_carID), "LeaseAgreement: Car already leased");
 
 
         contractDuration = getOptionsChoice(_newContractDurationIndex, contractDurationOptions);
@@ -62,7 +64,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     }
 
     modifier onlyOwner() { //TODO: util?
-        require(msg.sender == bilBoyd, "LeaseAgreement: Only the owner-company can perform this action");
+        require(msg.sender == company, "LeaseAgreement: Only the owner-company can perform this action");
         _;
     }
 
@@ -76,7 +78,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
             upkeepNeeded = true;
         }
 
-        if (bilBoydConfirmed && block.timestamp >= nextPaymentDate) {
+        if (companyConfirmed && block.timestamp >= nextPaymentDate) {
             upkeepNeeded = true;
         }
 
@@ -92,7 +94,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
             executeTermination();
         }
 
-        else if (bilBoydConfirmed && block.timestamp >= nextPaymentDate && !paidMonthlyQuota) {
+        else if (companyConfirmed && block.timestamp >= nextPaymentDate && !paidMonthlyQuota) {
             // The customer has not paid their quota on time:
 
             if (extended || !checkForSolvency()) {
@@ -104,7 +106,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
             }
         }
 
-        else if (bilBoydConfirmed && block.timestamp >= nextPaymentDate && paidMonthlyQuota) {
+        else if (companyConfirmed && block.timestamp >= nextPaymentDate && paidMonthlyQuota) {
             // The customer has paid their qouta on time:
             if(extended) {
                 nextPaymentDate += 20 days; 
@@ -121,13 +123,13 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
     /**
     * @notice Executes the termination process of the lease agreement.
-    * @dev Transfers the remaining contract balance to and the car NFT to the bilboyd company.
+    * @dev Transfers the remaining contract balance to and the car NFT to the company company.
     * Marks the contract as terminated for all functions using the `notTerminated` modifier.
     * This function is protected by the `notTerminated` modifier to ensure it cannot be executed if the contract is already terminated.
     */
     function executeTermination() private notTerminated {
-        bilBoyd.transfer(this.checkContractValue());
-        carNFTContract.returnCarNFT(carId);
+        company.transfer(this.checkContractValue());
+        carNFTContract.returnCarNFT(carId, customer, company);
         //update mileage to the car manually; cannot be predicted
         terminated = true;
     }
@@ -144,13 +146,13 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
     // Used by the company to confirm that the customer's deal is accepted by the company
     function confirmDeal() public notTerminated onlyOwner {
-        bilBoydConfirmed = true;
-        bilBoyd.transfer(downPayment + monthlyQuota);
+        companyConfirmed = true;
+        company.transfer(downPayment + monthlyQuota);
         confirmDate = block.timestamp;
         nextPaymentDate = confirmDate + 31 days; // It is assumed that the customer is retrieving the car the next day, 
         //and can pay for the next period in the next 30 days after that
         paidMonthlyQuota = false;
-        carNFTContract.leaseCarNFT(this.getCustomer(), this.getBilBoyd(), this.getCarId());
+        carNFTContract.leaseCarNFT(this.getCustomer(), this.getcompany(), this.getCarId());
         contractDuration -= 1;
     }
 
@@ -191,12 +193,14 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
     function extendLease (
         uint256 newContractDuration, 
-        uint8 driverExperienceYears, 
-        uint256 mileageCap //TODO: IS ALREADY AS ATTR
+        uint8 driverExperienceYears,
+        uint8 newMileageCapIndex
     ) public notTerminated onlyOwner {
         require(msg.sender == customer, "LeaseAgreement: Only customer can extend");
         // Get the car data from CarNFT contract by accessing each field individually
         Car memory car = carNFTContract.getCarByCarID(this.getCarId());
+
+        mileageCap = getOptionsChoice(newMileageCapIndex, mileageCapOptions);
         
         // Now you can access car fields such as car.originalValue, car.mileage, etc.
         // Recompute monthly quota based on new parameters
@@ -212,13 +216,13 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     function leaseNewCar(uint256 newCarId) public notTerminated {
         require(msg.sender == customer, "LeaseAgreement: Only customer can lease a new car");
         // Transfer new car NFT to Alice
-        carNFTContract.safeTransferFrom(bilBoyd, customer, newCarId); //Can use leaseCarNFT
+        carNFTContract.safeTransferFrom(company, customer, newCarId); //Can use leaseCarNFT
     }
 
 
-    // Getter for bilBoyd
-    function getBilBoyd() public view returns (address payable) {
-        return bilBoyd;
+    // Getter for company
+    function getcompany() public view returns (address payable) {
+        return company;
     }
 
     // Getter for customer (Alice)
@@ -236,9 +240,9 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         return monthlyQuota;
     }
 
-    // Getter for bilBoydConfirmed
-    function isBilBoydConfirmed() public view returns (bool) {
-        return bilBoydConfirmed;
+    // Getter for companyConfirmed
+    function iscompanyConfirmed() public view returns (bool) {
+        return companyConfirmed;
     }
 
     // Getter for carNFTContract
