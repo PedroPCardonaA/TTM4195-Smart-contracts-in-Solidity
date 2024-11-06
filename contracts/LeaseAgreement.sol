@@ -284,13 +284,13 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     function extendLease (
         uint8 _extendedContractDurationIndex,
         uint8 _extendedContractMileageCapIndex,
-        uint256 _milesExpended,
+        uint256 _milesTotal,
         uint8 _driverExperienceYears
     ) public notTerminated onlyCustomer isLastMonth {
         Car memory car = carNFTContract.getCarByCarID(this.getCarId());
+        require(_milesTotal >= car.mileage, "LeaseAgreement: The new mileage-total must be greater than or equal to the previous");
 
-        uint256 mileageAfter = car.mileage + _milesExpended;
-        carNFTContract.setMileage(carId, mileageAfter);
+        carNFTContract.setMileage(carId, _milesTotal);
 
         contractDuration = getOptionsChoice(_extendedContractDurationIndex, contractDurationOptions);
         mileageCap = getOptionsChoice(_extendedContractMileageCapIndex, mileageCapOptions);
@@ -298,7 +298,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         // Recompute monthly quota based on new parameters
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
             car.originalValue,
-            mileageAfter,
+            _milesTotal,
             _driverExperienceYears,
             mileageCap,
             contractDuration
