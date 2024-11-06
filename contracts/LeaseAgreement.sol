@@ -86,7 +86,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         require(company == carNFTContract.checkCurrentCarNFTOwner(_carID), "LeaseAgreement: Car already leased");
 
         contractDuration = getOptionsChoice(_newContractDurationIndex, contractDurationOptions);
-        mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions);
+        mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions); 
 
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
             carNFT.originalValue,
@@ -113,15 +113,22 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         _;
     }
 
+    modifier onlyCustomer() {
+        require(msg.sender == customer, "LeaseAgreement: Only customer can modify lease");
+        _;
+    }
+
+    modifier isLastMonth() {
+        require(contractDuration == 0, "LeaseAgreement: Must wait until last month to terminate lease");
+        _;
+    }
+
     /**
      * @notice Checks if the contract needs upkeep.
      * @dev The contract needs upkeep if the deal registration deadline has passed or if the customer has not paid their monthly quota on time.
      */
-    function checkUpkeep( bytes calldata /* checkData */) external view override notTerminated returns (
-        bool upkeepNeeded, bytes memory /* performData */
-        )
-    {
-        if ( dealRegistrationTime != 0 && (block.timestamp - dealRegistrationTime) > registrationDeadline) {
+    function checkUpkeep(bytes calldata /* checkData */) external view notTerminated override returns (bool upkeepNeeded, bytes memory /* performData */) {
+        if (dealRegistrationTime != 0 && (block.timestamp - dealRegistrationTime) > registrationDeadline) {
             upkeepNeeded = true;
         }
 
@@ -244,9 +251,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
      * @dev The customer can only terminate the lease agreement at the end of the contract duration
      * after the last monthly payment has been made.
      */
-    function terminateLease() public notTerminated {
-        require(msg.sender == customer, "LeaseAgreement: Only customer can terminate");
-        require(contractDuration == 0, "LeaseAgreement: Must wait until last month to terminate lease");
+    function terminateLease() public notTerminated isLastMonth onlyCustomer {
         executeTermination();
     }
 
@@ -270,27 +275,37 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         return array[_index];
     }
 
+
     /**
      * @notice Extends the lease agreement with new parameters.
      * @dev The customer can extend the lease agreement with new parameters such as contract duration, driver experience years, and mileage cap.
+     //TODO: ADD Other params descr
      */
-    function extendLease( uint256 newContractDuration, uint8 driverExperienceYears, uint256 mileageCap) public notTerminated onlyOwner {
-        require(
-            msg.sender == customer,
-            "LeaseAgreement: Only customer can extend"
-        );
-        // Get the car data from CarNFT contract by accessing each field individually
+    function extendLease (
+        uint8 _extendedContractDurationIndex,
+        uint8 _extendedContractMileageCapIndex,
+        uint256 _milesExpended,
+        uint8 _driverExperienceYears
+    ) public notTerminated onlyCustomer isLastMonth {
         Car memory car = carNFTContract.getCarByCarID(this.getCarId());
 
-        // Now you can access car fields such as car.originalValue, car.mileage, etc.
+        uint256 mileageAfter = car.mileage + _milesExpended;
+        carNFTContract.setMileage(carId, mileageAfter);
+
+        contractDuration = getOptionsChoice(_extendedContractDurationIndex, contractDurationOptions);
+        mileageCap = getOptionsChoice(_extendedContractMileageCapIndex, mileageCapOptions);
+        
         // Recompute monthly quota based on new parameters
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
             car.originalValue,
-            car.mileage,
-            driverExperienceYears,
+            mileageAfter,
+            _driverExperienceYears,
             mileageCap,
-            newContractDuration
+            contractDuration
         );
+
+        extended = false;
+        terminated = false;
     }
 
     /**
