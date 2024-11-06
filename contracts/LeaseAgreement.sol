@@ -67,6 +67,12 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     /**
      * @notice Creates a new lease agreement for a car between a company and a customer.
      * @dev The contract is deployed by the company and the car NFT is transferred to the company.
+     * @param carNFTAddress The address of the CarNFT contract
+     * @param _carID The ID of the car NFT
+     * @param _driverExperienceYears The number of years of driving experience of the customer
+     * @param _newContractDurationIndex The index of the selected contract duration
+     * @param _mileageCapIndex The index of the selected mileage cap
+     * @param _company The address of the company that is leasing the car
      */
     constructor(
         address carNFTAddress,
@@ -113,11 +119,13 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         _;
     }
 
+    /// @notice Modifier to ensure that only the customer can perform certain actions
     modifier onlyCustomer() {
         require(msg.sender == customer, "LeaseAgreement: Only customer can modify lease");
         _;
     }
 
+    /// @notice Modifier to ensure that the contract is in the last month of the lease
     modifier isLastMonth() {
         require(contractDuration == 0, "LeaseAgreement: Must wait until last month to terminate lease");
         _;
@@ -126,6 +134,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     /**
      * @notice Checks if the contract needs upkeep.
      * @dev The contract needs upkeep if the deal registration deadline has passed or if the customer has not paid their monthly quota on time.
+     * @param checkData The data required to check the upkeep. Required by chainlink.
      */
     function checkUpkeep(bytes calldata /* checkData */) external view notTerminated override returns (bool upkeepNeeded, bytes memory /* performData */) {
         if (dealRegistrationTime != 0 && (block.timestamp - dealRegistrationTime) > registrationDeadline) {
@@ -140,6 +149,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     /**
      * @notice Performs the upkeep of the lease agreement.
      * @dev If the deal registration deadline has passed, the customer's payment is trasferred back to them.
+     * @param performData The data required to perform the upkeep. Required by chainlink.
      */
     function performUpkeep( bytes calldata /* performData */) external override notTerminated {
         if ( dealRegistrationTime != 0 && (block.timestamp - dealRegistrationTime) > registrationDeadline) {
@@ -260,7 +270,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
      * @param _index The index of the selected option
      * @param array The array of available choices
      */
-    function getOptionsChoice( uint8 _index, uint16[8] memory array) private view notTerminated returns (uint16) {
+    function getOptionsChoice(uint8 _index, uint16[8] memory array) private view notTerminated returns (uint16) {
         require(_index >= 0 && _index < array.length, "LeaseAgreement: Invalid choice for mileage cap");
         return array[_index];
     }
@@ -270,7 +280,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
      * @param _index The index of the selected option
      * @param array The array of available choices
      */
-    function getOptionsChoice( uint8 _index, uint16[4] memory array) private view notTerminated returns (uint16) {
+    function getOptionsChoice(uint8 _index, uint16[4] memory array) private view notTerminated returns (uint16) {
         require(_index >= 0 && _index < array.length, "LeaseAgreement: Invalid choice for contract duration");
         return array[_index];
     }
@@ -279,7 +289,10 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     /**
      * @notice Extends the lease agreement with new parameters.
      * @dev The customer can extend the lease agreement with new parameters such as contract duration, driver experience years, and mileage cap.
-     //TODO: ADD Other params descr
+     * @param _extendedContractDurationIndex The index of the new contract duration
+     * @param _extendedContractMileageCapIndex The index of the new mileage cap
+     * @param _milesExpended The number of miles expended by the customer
+     * @param _driverExperienceYears The number of years of driving experience of the customer
      */
     function extendLease (
         uint8 _extendedContractDurationIndex,
@@ -311,6 +324,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     /**
      * @notice Leases a new car for the customer.
      * @dev The customer can lease a new car by transferring the car NFT from the company to the customer.
+     * @param newCarId The ID of the new car NFT
      */
     function leaseNewCar(uint256 newCarId) public notTerminated {
         require( msg.sender == customer, "LeaseAgreement: Only customer can lease a new car");
