@@ -125,8 +125,9 @@ contract CarNFT is ERC721{
         return _ownerOf(carId);  
     }
 
-    function setMileage(uint256 carId, uint256 _mileage) public validCarId(carId) onlyOwner returns(uint256){
+    function setMileage(uint256 carId, uint256 _mileage) public validCarId(carId) returns(uint256){
         require(_mileage >= 0, "CarNFT: Mileage cannot be negative");
+        require(msg.sender == owner || leaseAgreements[carId] == msg.sender,"CarNFT: Only the associated LeaseAgreement can update mileages");
         cars[carId].mileage = _mileage;
         return cars[carId].mileage;
     }

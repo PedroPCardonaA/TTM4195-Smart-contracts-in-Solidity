@@ -47,7 +47,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         require(company == carNFTContract.checkCurrentCarNFTOwner(_carID), "LeaseAgreement: Car already leased");
 
         contractDuration = getOptionsChoice(_newContractDurationIndex, contractDurationOptions);
-        mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions);
+        mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions); 
 
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
             carNFT.originalValue,
@@ -70,6 +70,16 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
     modifier notTerminated() {
         require(!terminated, "LeaseAgreement: Contract terminated");
+        _;
+    }
+
+    modifier onlyCustomer() {
+        require(msg.sender == customer, "LeaseAgreement: Only customer can modify lease");
+        _;
+    }
+
+    modifier isLastMonth() {
+        require(contractDuration == 0, "LeaseAgreement: Must wait until last month to terminate lease");
         _;
     }
 
@@ -177,9 +187,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         paidMonthlyQuota = true; 
     }
 
-    function terminateLease() public notTerminated {
-        require(msg.sender == customer, "LeaseAgreement: Only customer can terminate");
-        require(contractDuration == 0, "LeaseAgreement: Must wait until last month to terminate lease");
+    function terminateLease() public notTerminated isLastMonth onlyCustomer {
         executeTermination();
     }
 
@@ -195,23 +203,30 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
 
     function extendLease (
-        uint256 newContractDuration, 
-        uint8 driverExperienceYears, 
-        uint256 mileageCap //TODO: IS ALREADY AS ATTR
-    ) public notTerminated onlyOwner {
-        require(msg.sender == customer, "LeaseAgreement: Only customer can extend");
-        // Get the car data from CarNFT contract by accessing each field individually
+        uint8 _extendedContractDurationIndex,
+        uint8 _extendedContractMileageCapIndex,
+        uint256 _milesExpended,
+        uint8 _driverExperienceYears
+    ) public notTerminated onlyCustomer isLastMonth {
         Car memory car = carNFTContract.getCarByCarID(this.getCarId());
+
+        uint256 mileageAfter = car.mileage + _milesExpended;
+        carNFTContract.setMileage(carId, mileageAfter);
+
+        contractDuration = getOptionsChoice(_extendedContractDurationIndex, contractDurationOptions);
+        mileageCap = getOptionsChoice(_extendedContractMileageCapIndex, mileageCapOptions);
         
-        // Now you can access car fields such as car.originalValue, car.mileage, etc.
         // Recompute monthly quota based on new parameters
         monthlyQuota = carNFTContract.calculateMonthlyQuota(
             car.originalValue,
-            car.mileage,
-            driverExperienceYears,
+            mileageAfter,
+            _driverExperienceYears,
             mileageCap,
-            newContractDuration
+            contractDuration
         );
+
+        extended = false;
+        terminated = false;
     }
 
     function leaseNewCar(uint256 newCarId) public notTerminated {
