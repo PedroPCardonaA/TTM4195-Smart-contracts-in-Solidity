@@ -16,16 +16,16 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     address payable private immutable company;
 
     // The customer that is leasing. In our case it's Alice.
-    address payable private customer;
+    address payable private immutable customer;
 
     // Is interpreted as deposit and it will return when the contract is terminated
-    uint256 private immutable downPayment;
+    uint256 private downPayment;
 
     // What the customer pays monthly
     uint256 private monthlyQuota;
 
     // Time of deployment of this contract.
-    uint256 private immutable deployTime;
+    uint256 private deployTime;
 
     // The time when the deal got registered.
     uint256 private dealRegistrationTime;
@@ -80,14 +80,17 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         uint8 _driverExperienceYears,
         uint8 _newContractDurationIndex,
         uint8 _mileageCapIndex,
-        address _company
+        address _company,
+        address _customer
     ) {
         deployTime = block.timestamp;
-        registrationDeadline = 10 seconds; //TODO: Change to x weeks
+        registrationDeadline = 7 days; //TODO: Change to x weeks
         company = payable(_company);
+        customer = payable(_customer);
         carNFTContract = CarNFT(carNFTAddress);
         carNFT = carNFTContract.getCarByCarID(_carID);
         carId = _carID;
+
 
         require(company == carNFTContract.checkCurrentCarNFTOwner(_carID), "LeaseAgreement: Car already leased");
         require(carNFTContract.availableCarNFT(carId), "LeaseAgreement: Car already reserved");
@@ -204,7 +207,6 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         carNFTContract.reserve(carId);
         dealRegistrationTime = block.timestamp;
         uint256 difference = msg.value - (downPayment + monthlyQuota); 
-        customer = payable(msg.sender);
         customer.transfer(difference);
     }
 
@@ -321,15 +323,42 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         terminated = false;
     }
 
-    /**
-     * @notice Leases a new car for the customer.
-     * @dev The customer can lease a new car by transferring the car NFT from the company to the customer.
-     * @param newCarId The ID of the new car NFT
-     */
-    function leaseNewCar(uint256 newCarId) public notTerminated {
-        require( msg.sender == customer, "LeaseAgreement: Only customer can lease a new car");
-        // Transfer new car NFT to Alice
-        carNFTContract.safeTransferFrom(company, customer, newCarId); //Can use leaseCarNFT
+
+    function leaseNewCar(
+        uint256 _carID,
+        uint8 _driverExperienceYears,
+        uint8 _newContractDurationIndex,
+        uint8 _mileageCapIndex
+        ) public notTerminated onlyCustomer{
+
+        company.transfer(downPayment);
+        company.transfer(this.checkContractValue());
+        carNFTContract.returnCarNFT(carId);
+        
+        deployTime = block.timestamp;
+        registrationDeadline = 7 days;
+        carNFT = carNFTContract.getCarByCarID(_carID);
+        carId = _carID;
+
+
+        require(company == carNFTContract.checkCurrentCarNFTOwner(_carID), "LeaseAgreement: Car already leased");
+        require(carNFTContract.availableCarNFT(carId), "LeaseAgreement: Car already reserved");
+
+        contractDuration = getOptionsChoice(_newContractDurationIndex, contractDurationOptions);
+        mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions); 
+
+        monthlyQuota = carNFTContract.calculateMonthlyQuota(
+            carNFT.originalValue,
+            carNFT.mileage,
+            _driverExperienceYears,
+            mileageCap,
+            contractDuration
+        );
+        
+        extended = false;
+        terminated = false;
+        downPayment = monthlyQuota * 3;
+        dealRegistrationTime = 0;
     }
 
     /// @notice Getter for company
