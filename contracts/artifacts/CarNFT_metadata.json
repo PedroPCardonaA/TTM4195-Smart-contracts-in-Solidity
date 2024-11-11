@@ -220,6 +220,25 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "carId",
+						"type": "uint256"
+					}
+				],
+				"name": "availableCarNFT",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "address",
 						"name": "owner",
 						"type": "address"
@@ -542,6 +561,19 @@
 						"type": "uint256"
 					}
 				],
+				"name": "reserve",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "carId",
+						"type": "uint256"
+					}
+				],
 				"name": "returnCarNFT",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -716,6 +748,7 @@
 			}
 		],
 		"devdoc": {
+			"details": "The contract is owned and managed by the creator, enabling functions for car lifecycle management",
 			"errors": {
 				"ERC721IncorrectOwner(address,uint256,address)": [
 					{
@@ -801,20 +834,96 @@
 				"approve(address,uint256)": {
 					"details": "See {IERC721-approve}."
 				},
+				"availableCarNFT(uint256)": {
+					"params": {
+						"carId": ": ID of the car to lease."
+					},
+					"returns": {
+						"_0": "whether the car is available to lease."
+					}
+				},
 				"balanceOf(address)": {
 					"details": "See {IERC721-balanceOf}."
+				},
+				"calculateMonthlyQuota(uint256,uint256,uint8,uint256,uint256)": {
+					"params": {
+						"contractDuration": "Duration of the lease contract in months",
+						"currentMileage": "The car's current mileage",
+						"driverExperienceYears": "Years of driving experience of the customer",
+						"mileageCap": "Mileage cap for the lease contract",
+						"originalValue": "The original value of the car in wei"
+					},
+					"returns": {
+						"_0": "The calculated monthly quota for the lease"
+					}
+				},
+				"checkCurrentCarNFTOwner(uint256)": {
+					"params": {
+						"carId": "ID of the car to check ownership for"
+					},
+					"returns": {
+						"_0": "Address of the current owner of the car"
+					}
+				},
+				"constructor": {
+					"params": {
+						"name": "The ERC721 name",
+						"symbol": "The ERC721 symbol"
+					}
 				},
 				"getApproved(uint256)": {
 					"details": "See {IERC721-getApproved}."
 				},
+				"getCarByCarID(uint256)": {
+					"params": {
+						"carId": "ID of the car to retrieve data for"
+					},
+					"returns": {
+						"_0": "Car struct containing the car's attributes"
+					}
+				},
+				"getCurrentSupply()": {
+					"returns": {
+						"_0": "The current supply count"
+					}
+				},
 				"isApprovedForAll(address,address)": {
 					"details": "See {IERC721-isApprovedForAll}."
+				},
+				"leaseCarNFT(address,address,uint256)": {
+					"details": "Only the owner (company) can initiate the leasing. The car must not be already leased.",
+					"params": {
+						"carId": "ID of the car to lease",
+						"company": "Address of the current car owner",
+						"toCustomer": "Address of the customer leasing the car"
+					}
+				},
+				"mintCarNFT(string,string,uint16,uint128,uint32)": {
+					"details": "Only the contract owner can mint new cars",
+					"params": {
+						"color": "The color of the car",
+						"mileage": "The initial mileage of the car",
+						"model": "The model of the car",
+						"originalValue": "The original value of the car in wei",
+						"yearOfMatriculation": "The year the car was registered, must be within a realistic range"
+					}
 				},
 				"name()": {
 					"details": "See {IERC721Metadata-name}."
 				},
 				"ownerOf(uint256)": {
 					"details": "See {IERC721-ownerOf}."
+				},
+				"reserve(uint256)": {
+					"details": "Set the corresponding availability boolean to false.",
+					"params": {
+						"carId": ": ID of the car to lease"
+					}
+				},
+				"returnCarNFT(uint256)": {
+					"params": {
+						"carId": "ID of the car being returned"
+					}
 				},
 				"safeTransferFrom(address,address,uint256)": {
 					"details": "See {IERC721-safeTransferFrom}."
@@ -824,6 +933,16 @@
 				},
 				"setApprovalForAll(address,bool)": {
 					"details": "See {IERC721-setApprovalForAll}."
+				},
+				"setMileage(uint256,uint256)": {
+					"details": "Only the owner can set the mileage.",
+					"params": {
+						"_mileage": "The new mileage value to set",
+						"carId": "ID of the car to update mileage for"
+					},
+					"returns": {
+						"_0": "The updated mileage of the car"
+					}
 				},
 				"supportsInterface(bytes4)": {
 					"details": "See {IERC165-supportsInterface}."
@@ -838,11 +957,53 @@
 					"details": "See {IERC721-transferFrom}."
 				}
 			},
+			"title": "CarNFT",
 			"version": 1
 		},
 		"userdoc": {
 			"kind": "user",
-			"methods": {},
+			"methods": {
+				"availableCarNFT(uint256)": {
+					"notice": "Get the availability of a car."
+				},
+				"calculateMonthlyQuota(uint256,uint256,uint8,uint256,uint256)": {
+					"notice": "Calculates the monthly lease quota based on various factors"
+				},
+				"checkCurrentCarNFTOwner(uint256)": {
+					"notice": "Checks the current owner of a car NFT by car ID."
+				},
+				"constructor": {
+					"notice": "Initializes a new CarNFT contract with a name and symbol"
+				},
+				"getCarByCarID(uint256)": {
+					"notice": "Retrieves car data for a specific car ID."
+				},
+				"getCurrentSupply()": {
+					"notice": "Retrieves the number of minted cars in the system."
+				},
+				"getOwner()": {
+					"notice": "Retrieves the owner of the contract."
+				},
+				"giveApprovement(address,uint256)": {
+					"notice": "Modifier to approve a client to lease a car. Only the owner can approve"
+				},
+				"leaseCarNFT(address,address,uint256)": {
+					"notice": "Leases a car NFT to a customer by transferring ownership from the company to the customer."
+				},
+				"mintCarNFT(string,string,uint16,uint128,uint32)": {
+					"notice": "Mints a new car NFT"
+				},
+				"reserve(uint256)": {
+					"notice": "Reserve a car by its id, but only if it is available."
+				},
+				"returnCarNFT(uint256)": {
+					"notice": "Returns a leased car NFT back to the company."
+				},
+				"setMileage(uint256,uint256)": {
+					"notice": "Sets the mileage for a specific car."
+				}
+			},
+			"notice": "The NFT is represented as a ERC721 token representing individual cars with attributes and ownership. This contract allows minting, leasing, returning, and updating car NFTs",
 			"version": 1
 		}
 	},
@@ -975,19 +1136,19 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x000bccbe934d5b47caaaab78645891767a94ee01aa3ec83419ace8a15c04337f",
+			"keccak256": "0x5488eee0167426f62dc59eb94b314f002478765c94aaf233d5552f103ef9c764",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://ad4857247948043ce986910150872b3b1873e1bcfbda703188507eb18089690a",
-				"dweb:/ipfs/QmSPWD9udB9n3eGrSTtYzNVQWJ12mGY23FPmDYARhb5D8h"
+				"bzz-raw://f9919fafe4c4e49c61e51f7576154cf091cb30867f4ce32c607742170f6801d9",
+				"dweb:/ipfs/QmW4v4ifQ8DV6QyHM4SiVbqtsVSZnUkTa5sxrFxLXWnfbw"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
-			"keccak256": "0x9554754e6f3b0d5ba3844aeb7ec5f1578729fc7432c525cb41d5124bafb91880",
+			"keccak256": "0x1ca012b31c34962a9c6e3a0fbe715c722e7dcd2a5d1b45f573b65be052caf0ed",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://088f5e6fab76ab89ba27f2fc0b8303df76af1b8e05716af080f0ccf6c52a88bc",
-				"dweb:/ipfs/QmZoXCr1qbRpZV5jBRmC8GRbupiyRhjNMASXFzzRbosNhC"
+				"bzz-raw://b5ab5320c66e8644c70945552fb255d8751f65d1185c801e36b57281b43ae0c0",
+				"dweb:/ipfs/QmQUXANnaKM4PTUrZPLXo1RYuCqNAbYGNLdJF4hdh9wVjQ"
 			]
 		}
 	},
