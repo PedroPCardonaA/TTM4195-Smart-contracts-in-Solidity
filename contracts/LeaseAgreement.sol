@@ -90,6 +90,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         carId = _carID;
 
         require(company == carNFTContract.checkCurrentCarNFTOwner(_carID), "LeaseAgreement: Car already leased");
+        require(carNFTContract.availableCarNFT(carId), "LeaseAgreement: Car already reserved");
 
         contractDuration = getOptionsChoice(_newContractDurationIndex, contractDurationOptions);
         mileageCap = getOptionsChoice(_mileageCapIndex, mileageCapOptions); 
@@ -200,6 +201,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     function registerDeal() public payable notTerminated {
         require( deployTime + 2 weeks >= block.timestamp, "LeaseAgreement: The deadline ran out");
         require( msg.value >= downPayment + monthlyQuota, "LeaseAgreement: Incorrect payment amount");
+        carNFTContract.reserve(carId);
         dealRegistrationTime = block.timestamp;
         uint256 difference = msg.value - (downPayment + monthlyQuota); 
         customer = payable(msg.sender);

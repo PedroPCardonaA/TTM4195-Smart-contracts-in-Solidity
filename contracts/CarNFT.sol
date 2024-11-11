@@ -18,6 +18,9 @@ contract CarNFT is ERC721 {
     // Mapping with car data for each token ID
     mapping(uint256 => Car) private cars;
 
+    // Mapping carId to availability boolean
+    mapping(uint256 => bool) private availability;
+
     // Mapping with lease agreements for each token ID
     mapping(uint256 => address) public leaseAgreements;
 
@@ -80,7 +83,27 @@ contract CarNFT is ERC721 {
             originalValue,
             mileage
         );
+        availability[tokenId] = true;
         _mint(owner, tokenId);
+    }
+
+    /**
+     * @notice Reserve a car by its id, but only if it is available.
+     * @dev Set the corresponding availability boolean to false.
+     * @param carId: ID of the car to lease
+    */
+    function reserve(uint256 carId) external validCarId(carId) {
+        require(availability[carId], "This car isn't available for lease");
+        availability[carId] = false;
+    }
+
+    /**
+     * @notice Get the availability of a car.
+     * @param carId: ID of the car to lease.
+     * @return whether the car is available to lease.
+    */
+    function availableCarNFT(uint256 carId) external view validCarId(carId) returns (bool) {
+        return availability[carId];
     }
 
     /**
@@ -108,6 +131,7 @@ contract CarNFT is ERC721 {
     require(leaseAgreements[carId] == msg.sender, "CarNFT: Only the associated LeaseAgreement can return the car");
         _transfer(_ownerOf(carId), owner, carId);
         leaseAgreements[carId] = address(0);
+        availability[carId] = true;
     }
 
     /**

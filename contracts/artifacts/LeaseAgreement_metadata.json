@@ -88,19 +88,24 @@
 			{
 				"inputs": [
 					{
-						"internalType": "uint256",
-						"name": "newContractDuration",
-						"type": "uint256"
+						"internalType": "uint8",
+						"name": "_extendedContractDurationIndex",
+						"type": "uint8"
 					},
 					{
 						"internalType": "uint8",
-						"name": "driverExperienceYears",
+						"name": "_extendedContractMileageCapIndex",
 						"type": "uint8"
 					},
 					{
 						"internalType": "uint256",
-						"name": "mileageCap",
+						"name": "_milesTotal",
 						"type": "uint256"
+					},
+					{
+						"internalType": "uint8",
+						"name": "_driverExperienceYears",
+						"type": "uint8"
 					}
 				],
 				"name": "extendLease",
@@ -314,13 +319,122 @@
 			}
 		],
 		"devdoc": {
+			"details": "The contract uses the CarNFT contract for managing the car NFTs and enforcing ownership.",
 			"kind": "dev",
-			"methods": {},
+			"methods": {
+				"checkUpkeep(bytes)": {
+					"details": "The contract needs upkeep if the deal registration deadline has passed or if the customer has not paid their monthly quota on time."
+				},
+				"confirmDeal()": {
+					"details": "The company confirms the deal and tran It is assumed that the customer is retrieving the car the next day, and can pay for the next period in the next 30 days. After that transfers the first monthly quota to themselves."
+				},
+				"constructor": {
+					"details": "The contract is deployed by the company and the car NFT is transferred to the company.",
+					"params": {
+						"_carID": "The ID of the car NFT",
+						"_company": "The address of the company that is leasing the car",
+						"_driverExperienceYears": "The number of years of driving experience of the customer",
+						"_mileageCapIndex": "The index of the selected mileage cap",
+						"_newContractDurationIndex": "The index of the selected contract duration",
+						"carNFTAddress": "The address of the CarNFT contract"
+					}
+				},
+				"extendLease(uint8,uint8,uint256,uint8)": {
+					"details": "The customer can extend the lease agreement with new parameters such as contract duration, driver experience years, and mileage cap.",
+					"params": {
+						"_driverExperienceYears": "The number of years of driving experience of the customer",
+						"_extendedContractDurationIndex": "The index of the new contract duration",
+						"_extendedContractMileageCapIndex": "The index of the new mileage cap",
+						"_milesTotal": "The number of miles expended by the customer"
+					}
+				},
+				"leaseNewCar(uint256)": {
+					"details": "The customer can lease a new car by transferring the car NFT from the company to the customer.",
+					"params": {
+						"newCarId": "The ID of the new car NFT"
+					}
+				},
+				"payMonthlyQuota()": {
+					"details": "The customer pays the monthly quota to the contract. If the payment is higher than the monthly quota,"
+				},
+				"performUpkeep(bytes)": {
+					"details": "If the deal registration deadline has passed, the customer's payment is trasferred back to them."
+				},
+				"registerDeal()": {
+					"details": "The customer must pay the down payment and the first monthly quota to register the deal."
+				},
+				"terminateLease()": {
+					"details": "The customer can only terminate the lease agreement at the end of the contract duration after the last monthly payment has been made."
+				}
+			},
+			"title": "LeaseAgreement",
 			"version": 1
 		},
 		"userdoc": {
 			"kind": "user",
-			"methods": {},
+			"methods": {
+				"checkContractValue()": {
+					"notice": "Gets the balance of the contract"
+				},
+				"checkUpkeep(bytes)": {
+					"notice": "Checks if the contract needs upkeep."
+				},
+				"confirmDeal()": {
+					"notice": "Confirms the lease agreement by the company."
+				},
+				"constructor": {
+					"notice": "Creates a new lease agreement for a car between a company and a customer."
+				},
+				"extendLease(uint8,uint8,uint256,uint8)": {
+					"notice": "Extends the lease agreement with new parameters."
+				},
+				"getCarId()": {
+					"notice": "Getter for the car id"
+				},
+				"getCarNFT()": {
+					"notice": "Getter for carNFT"
+				},
+				"getCarNFTContract()": {
+					"notice": "Getter for carNFTContract"
+				},
+				"getContractDuration()": {
+					"notice": "Getter for contractDuration"
+				},
+				"getContractMileageCap()": {
+					"notice": "Getter for mileageCap"
+				},
+				"getCustomer()": {
+					"notice": "Getter for customer (Alice)"
+				},
+				"getDownPayment()": {
+					"notice": "Getter for downPayment"
+				},
+				"getMonthlyQuota()": {
+					"notice": "Getter for monthlyQuota"
+				},
+				"getcompany()": {
+					"notice": "Getter for company"
+				},
+				"iscompanyConfirmed()": {
+					"notice": "Getter for companyConfirmed"
+				},
+				"leaseNewCar(uint256)": {
+					"notice": "Leases a new car for the customer."
+				},
+				"payMonthlyQuota()": {
+					"notice": "Pays the monthly quota for the lease agreement."
+				},
+				"performUpkeep(bytes)": {
+					"notice": "Performs the upkeep of the lease agreement."
+				},
+				"registerDeal()": {
+					"notice": "Registers a new lease agreement between the company and the customer."
+				},
+				"terminateLease()": {
+					"notice": "Terminates the lease agreement."
+				}
+			},
+			"notice": "Implements a lease agreement contract for a car between a company and a customer.  This contract provides functionalities for lease registration, confirmation, monthly payments, termination and extension  of the contract. The contract utilizes Chainlink Keepers for automated upkeep checks.",
 			"version": 1
 		}
 	},
@@ -485,19 +599,19 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0xb0c1ff031bd48359adc6e1bd66b97e52c0a1b720319cd49d20fe2eac9ace7a64",
+			"keccak256": "0xdbab2d0bf6a92430e4cd10345ec3e8a2c9bac40e45fad8aa48cbff500b51350f",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://0615609cce894e1ed7779c19beb540df8de3c3902f922c56c7e3b04bde4e4d42",
-				"dweb:/ipfs/QmfKeRKVZsE3SBPzhk9gFPgQdMX3zwJ428dgoCtx8r2wtk"
+				"bzz-raw://e955f74355091e20b27aa187b407878bf7884998f6d7f43afd35bc3b56d6c16d",
+				"dweb:/ipfs/QmYXkZahm5sPuJC56M85xkKbMmKayE37oHH1x5F4f83Wf4"
 			]
 		},
 		"contracts/LeaseAgreement.sol": {
-			"keccak256": "0x53fb1548b1e2b5bd68fbef2d7ee5711c7bc019de9c50d300435f5db26bcdebeb",
+			"keccak256": "0x03b3af83f28ad7c2052f91177a2670bc29ddd20c51770db9bc90de093d53d17b",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://ed08eb32398c521962e77f1ca8be9edbd45d6f3438f658056ff007534203ff9b",
-				"dweb:/ipfs/QmXKUcasFrHN2mMVYBRGFsv1u9qQ3YVAqRndz1Hb3eKy4Y"
+				"bzz-raw://bd4ea30fa809c7f7d78e8f9491e64e02d6378bc5d038721a752be7ed3a1d7656",
+				"dweb:/ipfs/QmXDGMJKKgRhyvAcPeQw4qHixoigsx9adjwfvdzcU9obG8"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
