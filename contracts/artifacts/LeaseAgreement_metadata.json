@@ -36,6 +36,11 @@
 						"internalType": "address",
 						"name": "_company",
 						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_customer",
+						"type": "address"
 					}
 				],
 				"stateMutability": "nonpayable",
@@ -599,19 +604,19 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0xdbab2d0bf6a92430e4cd10345ec3e8a2c9bac40e45fad8aa48cbff500b51350f",
+			"keccak256": "0x5488eee0167426f62dc59eb94b314f002478765c94aaf233d5552f103ef9c764",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://e955f74355091e20b27aa187b407878bf7884998f6d7f43afd35bc3b56d6c16d",
-				"dweb:/ipfs/QmYXkZahm5sPuJC56M85xkKbMmKayE37oHH1x5F4f83Wf4"
+				"bzz-raw://f9919fafe4c4e49c61e51f7576154cf091cb30867f4ce32c607742170f6801d9",
+				"dweb:/ipfs/QmW4v4ifQ8DV6QyHM4SiVbqtsVSZnUkTa5sxrFxLXWnfbw"
 			]
 		},
 		"contracts/LeaseAgreement.sol": {
-			"keccak256": "0x03b3af83f28ad7c2052f91177a2670bc29ddd20c51770db9bc90de093d53d17b",
+			"keccak256": "0xc11e43867be176fa77fe37af44d84b1723ed72286badb7e4a3ddfdaba7265b69",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://bd4ea30fa809c7f7d78e8f9491e64e02d6378bc5d038721a752be7ed3a1d7656",
-				"dweb:/ipfs/QmXDGMJKKgRhyvAcPeQw4qHixoigsx9adjwfvdzcU9obG8"
+				"bzz-raw://77a2b18b95b86bd6d4bbb76f5b51471387a0f9fa5f0e0490461177c16d9f3251",
+				"dweb:/ipfs/QmPfVsgZV7GKpVQrnk2CJ3FFBG4Sm7QwBZEakyzghzeWin"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {

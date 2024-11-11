@@ -33,11 +33,6 @@ contract CarNFT is ERC721 {
         _;
     }
 
-    /// @notice Modifier to approve a client to lease a car. Only the owner can approve
-    function giveApprovement(address client, uint256 carID) public onlyOwner {
-        approve(client, carID);
-    }
-
     /**
      * @notice Initializes a new CarNFT contract with a name and symbol
      * @param name The ERC721 name

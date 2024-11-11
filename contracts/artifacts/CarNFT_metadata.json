@@ -408,24 +408,6 @@
 				"inputs": [
 					{
 						"internalType": "address",
-						"name": "client",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "carID",
-						"type": "uint256"
-					}
-				],
-				"name": "giveApprovement",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
 						"name": "owner",
 						"type": "address"
 					},
@@ -984,9 +966,6 @@
 				"getOwner()": {
 					"notice": "Retrieves the owner of the contract."
 				},
-				"giveApprovement(address,uint256)": {
-					"notice": "Modifier to approve a client to lease a car. Only the owner can approve"
-				},
 				"leaseCarNFT(address,address,uint256)": {
 					"notice": "Leases a car NFT to a customer by transferring ownership from the company to the customer."
 				},
@@ -1136,11 +1115,11 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x5488eee0167426f62dc59eb94b314f002478765c94aaf233d5552f103ef9c764",
+			"keccak256": "0x32f1ab78e150c4e40ef1349a51855af7c06da14db14742c89bcb11e7aa69ad65",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://f9919fafe4c4e49c61e51f7576154cf091cb30867f4ce32c607742170f6801d9",
-				"dweb:/ipfs/QmW4v4ifQ8DV6QyHM4SiVbqtsVSZnUkTa5sxrFxLXWnfbw"
+				"bzz-raw://7f56c7dffa0daee882880b70566716a4d7efcd36b5b19fc7bf070301968b7b11",
+				"dweb:/ipfs/QmVBzS1jGJpmALLZ6pzonkkoxMoJxBAM2bF1bLJ64X88bf"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
