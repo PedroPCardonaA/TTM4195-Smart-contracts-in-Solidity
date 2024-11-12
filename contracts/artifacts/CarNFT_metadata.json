@@ -180,6 +180,25 @@
 					{
 						"indexed": true,
 						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "EtherReceived",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
 						"name": "from",
 						"type": "address"
 					},
@@ -198,6 +217,10 @@
 				],
 				"name": "Transfer",
 				"type": "event"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "fallback"
 			},
 			{
 				"inputs": [
@@ -727,10 +750,14 @@
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "receive"
 			}
 		],
 		"devdoc": {
-			"details": "The contract is owned and managed by the creator, enabling functions for car lifecycle management",
+			"details": "The contract is owned and managed by the creator, enabling functions for car lifecycle management.",
 			"errors": {
 				"ERC721IncorrectOwner(address,uint256,address)": [
 					{
@@ -818,10 +845,10 @@
 				},
 				"availableCarNFT(uint256)": {
 					"params": {
-						"carId": ": ID of the car to lease."
+						"carId": "ID of the car to check availability"
 					},
 					"returns": {
-						"_0": "whether the car is available to lease."
+						"_0": "Whether the car is available to lease"
 					}
 				},
 				"balanceOf(address)": {
@@ -897,9 +924,9 @@
 					"details": "See {IERC721-ownerOf}."
 				},
 				"reserve(uint256)": {
-					"details": "Set the corresponding availability boolean to false.",
+					"details": "Sets the corresponding availability boolean to false.",
 					"params": {
-						"carId": ": ID of the car to lease"
+						"carId": "ID of the car to reserve"
 					}
 				},
 				"returnCarNFT(uint256)": {
@@ -917,7 +944,7 @@
 					"details": "See {IERC721-setApprovalForAll}."
 				},
 				"setMileage(uint256,uint256)": {
-					"details": "Only the owner can set the mileage.",
+					"details": "Only the owner or the associated LeaseAgreement can set the mileage.",
 					"params": {
 						"_mileage": "The new mileage value to set",
 						"carId": "ID of the car to update mileage for"
@@ -943,6 +970,11 @@
 			"version": 1
 		},
 		"userdoc": {
+			"events": {
+				"EtherReceived(address,uint256)": {
+					"notice": "Event emitted when Ether is received"
+				}
+			},
 			"kind": "user",
 			"methods": {
 				"availableCarNFT(uint256)": {
@@ -973,7 +1005,7 @@
 					"notice": "Mints a new car NFT"
 				},
 				"reserve(uint256)": {
-					"notice": "Reserve a car by its id, but only if it is available."
+					"notice": "Reserve a car by its ID, but only if it is available."
 				},
 				"returnCarNFT(uint256)": {
 					"notice": "Returns a leased car NFT back to the company."
@@ -982,7 +1014,7 @@
 					"notice": "Sets the mileage for a specific car."
 				}
 			},
-			"notice": "The NFT is represented as a ERC721 token representing individual cars with attributes and ownership. This contract allows minting, leasing, returning, and updating car NFTs",
+			"notice": "The NFT is represented as an ERC721 token representing individual cars with attributes and ownership. This contract allows minting, leasing, returning, and updating car NFTs.",
 			"version": 1
 		}
 	},
@@ -1115,19 +1147,19 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x32f1ab78e150c4e40ef1349a51855af7c06da14db14742c89bcb11e7aa69ad65",
+			"keccak256": "0xef7569b86ee655524899af4bcf5c2db354167202177513cd5fc54c0a7dbac2d9",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://7f56c7dffa0daee882880b70566716a4d7efcd36b5b19fc7bf070301968b7b11",
-				"dweb:/ipfs/QmVBzS1jGJpmALLZ6pzonkkoxMoJxBAM2bF1bLJ64X88bf"
+				"bzz-raw://106387cedd322d78d0f82392dd9b5cf4ddb5e01e5693d997aecd310de0d94887",
+				"dweb:/ipfs/QmQN9qXPMmXek1NsU819zyrgmT586dWLVDNF9SMfcBoSFx"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
-			"keccak256": "0x1ca012b31c34962a9c6e3a0fbe715c722e7dcd2a5d1b45f573b65be052caf0ed",
+			"keccak256": "0x9554754e6f3b0d5ba3844aeb7ec5f1578729fc7432c525cb41d5124bafb91880",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b5ab5320c66e8644c70945552fb255d8751f65d1185c801e36b57281b43ae0c0",
-				"dweb:/ipfs/QmQUXANnaKM4PTUrZPLXo1RYuCqNAbYGNLdJF4hdh9wVjQ"
+				"bzz-raw://088f5e6fab76ab89ba27f2fc0b8303df76af1b8e05716af080f0ccf6c52a88bc",
+				"dweb:/ipfs/QmZoXCr1qbRpZV5jBRmC8GRbupiyRhjNMASXFzzRbosNhC"
 			]
 		}
 	},
