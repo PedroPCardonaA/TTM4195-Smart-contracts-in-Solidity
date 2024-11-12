@@ -7,13 +7,14 @@ import {Car} from "./structs/CarStruct.sol";
 
 /**
  * @title CarNFT
- * @notice The NFT is represented as a ERC721 token representing individual cars with attributes and ownership.
- * This contract allows minting, leasing, returning, and updating car NFTs
- * @dev The contract is owned and managed by the creator, enabling functions for car lifecycle management
+ * @notice The NFT is represented as an ERC721 token representing individual cars with attributes and ownership.
+ * This contract allows minting, leasing, returning, and updating car NFTs.
+ * @dev The contract is owned and managed by the creator, enabling functions for car lifecycle management.
  */
 contract CarNFT is ERC721 {
-    // Owner of the contract
-    address private owner;
+
+    /// @notice Owner of the contract
+    address private immutable owner;
 
     // Mapping with car data for each token ID
     mapping(uint256 => Car) private cars;
@@ -27,9 +28,25 @@ contract CarNFT is ERC721 {
     // Counter to keep track of the amount of token cars
     uint256 private currentSupply;
 
-    /// @notice Modifier to check if the caller is the owner of the contract
+    /**
+     * @notice Event emitted when Ether is received
+     */
+    event EtherReceived(address indexed sender, uint256 amount);
+
+    /**
+     * @notice Modifier to check if the caller is the owner of the contract
+     */
     modifier onlyOwner() {
         require(msg.sender == owner, "CarNFT: You need to be owner");
+        _;
+    }
+
+    /**
+     * @notice Modifier to validate that the car ID already exists in the system.
+     * @param carId ID of the car to validate
+     */
+    modifier validCarId(uint256 carId) {
+        require(carId <= getCurrentSupply(), "CarNFT: Car does not exist");
         _;
     }
 
@@ -41,6 +58,27 @@ contract CarNFT is ERC721 {
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {
         owner = msg.sender;
         currentSupply = 0;
+    }
+
+    /**
+     * @notice Receive function to handle plain Ether transfers (without data)
+     * @dev This function is called when Ether is sent to the contract with empty calldata
+     */
+    receive() external payable {
+        emit EtherReceived(msg.sender, msg.value);
+    }
+
+    /**
+     * @notice Fallback function that is called when an invalid function is invoked
+     * @dev This function accepts Ether sent to the contract with data
+     *      It reverts if no Ether is sent along with the invalid function call
+     */
+    fallback() external payable {
+        if (msg.value == 0) {
+            revert("CarNFT: Unrecognized function call without Ether");
+        }
+        // Accepts the Ether sent with data if it is present
+        emit EtherReceived(msg.sender, msg.value);
     }
 
     /**
@@ -64,7 +102,7 @@ contract CarNFT is ERC721 {
         require(
             yearOfMatriculation >= 1886 &&
                 yearOfMatriculation <=
-                uint256(block.timestamp / 31556926 + 1970) + 1,
+                    uint256(block.timestamp / 31556926 + 1970) + 1,
             "CarNFT: Invalid year of matriculation"
         );
         require(originalValue > 0, "CarNFT: Original value must be greater than zero");
@@ -83,20 +121,20 @@ contract CarNFT is ERC721 {
     }
 
     /**
-     * @notice Reserve a car by its id, but only if it is available.
-     * @dev Set the corresponding availability boolean to false.
-     * @param carId: ID of the car to lease
-    */
+     * @notice Reserve a car by its ID, but only if it is available.
+     * @dev Sets the corresponding availability boolean to false.
+     * @param carId ID of the car to reserve
+     */
     function reserve(uint256 carId) external validCarId(carId) {
-        require(availability[carId], "This car isn't available for lease");
+        require(availability[carId], "CarNFT: This car isn't available for lease");
         availability[carId] = false;
     }
 
     /**
      * @notice Get the availability of a car.
-     * @param carId: ID of the car to lease.
-     * @return whether the car is available to lease.
-    */
+     * @param carId ID of the car to check availability
+     * @return Whether the car is available to lease
+     */
     function availableCarNFT(uint256 carId) external view validCarId(carId) returns (bool) {
         return availability[carId];
     }
@@ -123,7 +161,10 @@ contract CarNFT is ERC721 {
      * @param carId ID of the car being returned
      */
     function returnCarNFT(uint256 carId) external {
-    require(leaseAgreements[carId] == msg.sender, "CarNFT: Only the associated LeaseAgreement can return the car");
+        require(
+            leaseAgreements[carId] == msg.sender,
+            "CarNFT: Only the associated LeaseAgreement can return the car"
+        );
         _transfer(_ownerOf(carId), owner, carId);
         leaseAgreements[carId] = address(0);
         availability[carId] = true;
@@ -145,14 +186,14 @@ contract CarNFT is ERC721 {
         uint256 mileageCap,
         uint256 contractDuration
     ) external pure returns (uint128) {
-        uint256 mileageDiscont;
+        uint256 mileageDiscount;
         uint256 baseRate = originalValue / 100;
         if (currentMileage < 1000) {
-            mileageDiscont = 0;
+            mileageDiscount = 0;
         } else if (currentMileage < 10000) {
-            mileageDiscont = (baseRate * 5) / 100;
+            mileageDiscount = (baseRate * 5) / 100;
         } else {
-            mileageDiscont = (baseRate * 20) / 100;
+            mileageDiscount = (baseRate * 20) / 100;
         }
         uint256 experienceFactor = driverExperienceYears > 5 ? 0 : (baseRate * 3) / 100;
         uint256 durationDiscount;
@@ -177,17 +218,8 @@ contract CarNFT is ERC721 {
             mileageFee = 0;
         }
 
-        uint128 quota = uint128(baseRate - mileageDiscont + experienceFactor - durationDiscount + mileageFee);
+        uint128 quota = uint128(baseRate - mileageDiscount + experienceFactor - durationDiscount + mileageFee);
         return quota;
-    }
-
-    /**
-     * @notice Modifier to validate that the car ID already exists in the system.
-     * @param carId ID of the car to validate
-     */
-    modifier validCarId(uint256 carId) {
-        require(carId <= this.getCurrentSupply(), "CarNFT: Car does not exist");
-        _;
     }
 
     /**
@@ -195,9 +227,7 @@ contract CarNFT is ERC721 {
      * @param carId ID of the car to retrieve data for
      * @return Car struct containing the car's attributes
      */
-    function getCarByCarID(
-        uint256 carId
-    ) public view validCarId(carId) returns (Car memory) {
+    function getCarByCarID(uint256 carId) public view validCarId(carId) returns (Car memory) {
         return cars[carId];
     }
 
@@ -246,23 +276,25 @@ contract CarNFT is ERC721 {
      * @param carId ID of the car to check ownership for
      * @return Address of the current owner of the car
      */
-    function checkCurrentCarNFTOwner(
-        uint256 carId
-    ) public view validCarId(carId) returns (address) {
+    function checkCurrentCarNFTOwner(uint256 carId) public view validCarId(carId) returns (address) {
         return _ownerOf(carId);
     }
 
     /**
      * @notice Sets the mileage for a specific car.
-     * @dev Only the owner can set the mileage.
+     * @dev Only the owner or the associated LeaseAgreement can set the mileage.
      * @param carId ID of the car to update mileage for
      * @param _mileage The new mileage value to set
      * @return The updated mileage of the car
      */
-    function setMileage(uint256 carId, uint256 _mileage) public validCarId(carId) returns(uint256){
+    function setMileage(uint256 carId, uint256 _mileage) public validCarId(carId) returns (uint256) {
         require(_mileage >= 0, "CarNFT: Mileage cannot be negative");
-        require(msg.sender == owner || leaseAgreements[carId] == msg.sender,"CarNFT: Only the associated LeaseAgreement can update mileages");
+        require(
+            msg.sender == owner || leaseAgreements[carId] == msg.sender,
+            "CarNFT: Only the associated LeaseAgreement can update mileages"
+        );
         cars[carId].mileage = _mileage;
         return cars[carId].mileage;
     }
+
 }
