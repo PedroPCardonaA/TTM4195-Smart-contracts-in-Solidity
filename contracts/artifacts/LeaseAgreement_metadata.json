@@ -47,6 +47,29 @@
 				"type": "constructor"
 			},
 			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "EtherReceived",
+				"type": "event"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "fallback"
+			},
+			{
 				"inputs": [],
 				"name": "checkContractValue",
 				"outputs": [
@@ -186,6 +209,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "getCompany",
+				"outputs": [
+					{
+						"internalType": "address payable",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "getContractDuration",
 				"outputs": [
 					{
@@ -215,7 +251,7 @@
 				"name": "getCustomer",
 				"outputs": [
 					{
-						"internalType": "address",
+						"internalType": "address payable",
 						"name": "",
 						"type": "address"
 					}
@@ -251,20 +287,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "getcompany",
-				"outputs": [
-					{
-						"internalType": "address payable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "iscompanyConfirmed",
+				"name": "isCompanyConfirmed",
 				"outputs": [
 					{
 						"internalType": "bool",
@@ -279,8 +302,23 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
-						"name": "newCarId",
+						"name": "_carID",
 						"type": "uint256"
+					},
+					{
+						"internalType": "uint8",
+						"name": "_driverExperienceYears",
+						"type": "uint8"
+					},
+					{
+						"internalType": "uint8",
+						"name": "_newContractDurationIndex",
+						"type": "uint8"
+					},
+					{
+						"internalType": "uint8",
+						"name": "_mileageCapIndex",
+						"type": "uint8"
 					}
 				],
 				"name": "leaseNewCar",
@@ -321,6 +359,10 @@
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "receive"
 			}
 		],
 		"devdoc": {
@@ -331,13 +373,14 @@
 					"details": "The contract needs upkeep if the deal registration deadline has passed or if the customer has not paid their monthly quota on time."
 				},
 				"confirmDeal()": {
-					"details": "The company confirms the deal and tran It is assumed that the customer is retrieving the car the next day, and can pay for the next period in the next 30 days. After that transfers the first monthly quota to themselves."
+					"details": "The company confirms the deal and transfers the first monthly quota to themselves. It is assumed that the customer is retrieving the car the next day, and can pay for the next period in the next 30 days."
 				},
 				"constructor": {
-					"details": "The contract is deployed by the company and the car NFT is transferred to the company.",
+					"details": "The contract is deployed by the company, and the car NFT is transferred to the company.",
 					"params": {
 						"_carID": "The ID of the car NFT",
 						"_company": "The address of the company that is leasing the car",
+						"_customer": "The address of the customer",
 						"_driverExperienceYears": "The number of years of driving experience of the customer",
 						"_mileageCapIndex": "The index of the selected mileage cap",
 						"_newContractDurationIndex": "The index of the selected contract duration",
@@ -353,17 +396,20 @@
 						"_milesTotal": "The number of miles expended by the customer"
 					}
 				},
-				"leaseNewCar(uint256)": {
-					"details": "The customer can lease a new car by transferring the car NFT from the company to the customer.",
+				"leaseNewCar(uint256,uint8,uint8,uint8)": {
+					"details": "Allows the customer to lease a new car.",
 					"params": {
-						"newCarId": "The ID of the new car NFT"
+						"_carID": "The ID of the new car",
+						"_driverExperienceYears": "The customer's years of driving experience",
+						"_mileageCapIndex": "The index of the new mileage cap",
+						"_newContractDurationIndex": "The index of the new contract duration"
 					}
 				},
 				"payMonthlyQuota()": {
-					"details": "The customer pays the monthly quota to the contract. If the payment is higher than the monthly quota,"
+					"details": "The customer pays the monthly quota to the contract. If the payment is higher than the monthly quota, the excess amount is returned to the customer."
 				},
 				"performUpkeep(bytes)": {
-					"details": "If the deal registration deadline has passed, the customer's payment is trasferred back to them."
+					"details": "If the deal registration deadline has passed, the customer's payment is transferred back to them."
 				},
 				"registerDeal()": {
 					"details": "The customer must pay the down payment and the first monthly quota to register the deal."
@@ -376,6 +422,11 @@
 			"version": 1
 		},
 		"userdoc": {
+			"events": {
+				"EtherReceived(address,uint256)": {
+					"notice": "Event emitted when Ether is received"
+				}
+			},
 			"kind": "user",
 			"methods": {
 				"checkContractValue()": {
@@ -394,13 +445,16 @@
 					"notice": "Extends the lease agreement with new parameters."
 				},
 				"getCarId()": {
-					"notice": "Getter for the car id"
+					"notice": "Getter for the car ID"
 				},
 				"getCarNFT()": {
 					"notice": "Getter for carNFT"
 				},
 				"getCarNFTContract()": {
 					"notice": "Getter for carNFTContract"
+				},
+				"getCompany()": {
+					"notice": "Getter for company"
 				},
 				"getContractDuration()": {
 					"notice": "Getter for contractDuration"
@@ -409,7 +463,7 @@
 					"notice": "Getter for mileageCap"
 				},
 				"getCustomer()": {
-					"notice": "Getter for customer (Alice)"
+					"notice": "Getter for customer"
 				},
 				"getDownPayment()": {
 					"notice": "Getter for downPayment"
@@ -417,14 +471,11 @@
 				"getMonthlyQuota()": {
 					"notice": "Getter for monthlyQuota"
 				},
-				"getcompany()": {
-					"notice": "Getter for company"
-				},
-				"iscompanyConfirmed()": {
+				"isCompanyConfirmed()": {
 					"notice": "Getter for companyConfirmed"
 				},
-				"leaseNewCar(uint256)": {
-					"notice": "Leases a new car for the customer."
+				"leaseNewCar(uint256,uint8,uint8,uint8)": {
+					"notice": "Leases a new car under the same agreement."
 				},
 				"payMonthlyQuota()": {
 					"notice": "Pays the monthly quota for the lease agreement."
@@ -439,7 +490,7 @@
 					"notice": "Terminates the lease agreement."
 				}
 			},
-			"notice": "Implements a lease agreement contract for a car between a company and a customer.  This contract provides functionalities for lease registration, confirmation, monthly payments, termination and extension  of the contract. The contract utilizes Chainlink Keepers for automated upkeep checks.",
+			"notice": "Implements a lease agreement contract for a car between a company and a customer.  This contract provides functionalities for lease registration, confirmation, monthly payments, termination, and extension  of the contract. The contract utilizes Chainlink Keepers for automated upkeep checks.",
 			"version": 1
 		}
 	},
@@ -460,35 +511,35 @@
 	},
 	"sources": {
 		"@chainlink/contracts/src/v0.8/AutomationBase.sol": {
-			"keccak256": "0x5d354afa1a97dffe66094397cdcbb0c14713cf3d609d88fd8f9891010e9a351a",
+			"keccak256": "0xefd1603987351872d57fc092f54ce51d275a8cdce351f40afedbec52474e8405",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://3613ee132e1f05b3e23955db6a849966487fab8ea33e9bb70d6f038fc48c0608",
-				"dweb:/ipfs/QmRgdumWFMX35vSrZpCCvXDTvRBVXRkexnxoZqqfnGisnZ"
+				"bzz-raw://6f389cd2301683e0a63e83829dda77cfd1293c3b5195271cf24edc679e8913dd",
+				"dweb:/ipfs/QmVvRnkqEtHE5okQUoJkRP2gNs4j7FadbSGirTWdQsY29c"
 			]
 		},
 		"@chainlink/contracts/src/v0.8/AutomationCompatible.sol": {
-			"keccak256": "0x40e5ae0eff4edd0740c1b5590d09c344f84dee031e82d5294563e99603774f80",
+			"keccak256": "0x160761445c58aedce801a1c8f95d68562132a0c9766b53742ee10c7a7c307a79",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://24a134c3bea2e8a6ed29f109e422a9bafb3f43523235188618cf016ed86fafc8",
-				"dweb:/ipfs/QmPUGoVde38kbteT358jsskzh5spoJtUoaNZ8UJWVqP3im"
+				"bzz-raw://8ec8a2fdc84e9562d989335904c859f3ad4bfb3e63b06d7c9ad870801506ee3b",
+				"dweb:/ipfs/QmYzDQyNAbP2DqWmMJzKYczKBFBfgmorHzCNMJQ1FBrmLP"
 			]
 		},
 		"@chainlink/contracts/src/v0.8/KeeperCompatible.sol": {
-			"keccak256": "0xa5f26a85ab9a927016e27af9f1ec33f878c28d8f06cb611e7fb2e189a5336a43",
+			"keccak256": "0x81cb81ec1e0bedc9e0894e7b0aac52da030b667e3820030aad072e0c6f6e4716",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://03a963b546b80fb62d2ef16805a8acae1c17b2038d76c133f4779ec87484f9b0",
-				"dweb:/ipfs/QmWvwAFDHp5fQNPFQ5shAFh5YRNNzqLMoS5LZYDjPnydFw"
+				"bzz-raw://9ba403f2e825810718ca00a8407959d831a01616caa26be1a9d6f0297e3086ec",
+				"dweb:/ipfs/QmYYLoBoHH1hVjZQUoogr1PCoAT9Ng3SLs8RarFTq5UiPU"
 			]
 		},
 		"@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol": {
-			"keccak256": "0x67076747c6f66d8d43472a56e72879c350056bff82e069addaf9064922863340",
+			"keccak256": "0xbdf0b47389f34a3d09ac1b733aa59adf1257454e84a837e28091cc7628f117e1",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b738dba680a6fbc4afc85819743f13f5b7f4790ec8634c9894e1160327b11b6e",
-				"dweb:/ipfs/Qmbv3euvQppeBm2g61khcJSRMZWi78xUWzbnjKAvDBnka4"
+				"bzz-raw://13b9cc26d54e4827a4369ec6909b6efafaad26632f8bd08afb17bfd57d094e7f",
+				"dweb:/ipfs/QmQVP9c8BXkB4e6fc27ucEPFkGSLc6h8Bfte6qW3WMrwmN"
 			]
 		},
 		"@openzeppelin/contracts/interfaces/draft-IERC6093.sol": {
@@ -604,27 +655,27 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x5488eee0167426f62dc59eb94b314f002478765c94aaf233d5552f103ef9c764",
+			"keccak256": "0xef7569b86ee655524899af4bcf5c2db354167202177513cd5fc54c0a7dbac2d9",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://f9919fafe4c4e49c61e51f7576154cf091cb30867f4ce32c607742170f6801d9",
-				"dweb:/ipfs/QmW4v4ifQ8DV6QyHM4SiVbqtsVSZnUkTa5sxrFxLXWnfbw"
+				"bzz-raw://106387cedd322d78d0f82392dd9b5cf4ddb5e01e5693d997aecd310de0d94887",
+				"dweb:/ipfs/QmQN9qXPMmXek1NsU819zyrgmT586dWLVDNF9SMfcBoSFx"
 			]
 		},
 		"contracts/LeaseAgreement.sol": {
-			"keccak256": "0xc11e43867be176fa77fe37af44d84b1723ed72286badb7e4a3ddfdaba7265b69",
+			"keccak256": "0x1879da23fe0e59ec5a317360db76e8bf2756c94fc97d1fa6f555a68c6e1c6bf4",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://77a2b18b95b86bd6d4bbb76f5b51471387a0f9fa5f0e0490461177c16d9f3251",
-				"dweb:/ipfs/QmPfVsgZV7GKpVQrnk2CJ3FFBG4Sm7QwBZEakyzghzeWin"
+				"bzz-raw://144875e28a85a92bfcacd9557b019765eea5c53c084b0101383d74e3ff9ddfc8",
+				"dweb:/ipfs/QmYFJkTEF4sHTBr1LRpbWA1sCkRLzmSFCrcPxi9moaAwdz"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
-			"keccak256": "0x1ca012b31c34962a9c6e3a0fbe715c722e7dcd2a5d1b45f573b65be052caf0ed",
+			"keccak256": "0x9554754e6f3b0d5ba3844aeb7ec5f1578729fc7432c525cb41d5124bafb91880",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b5ab5320c66e8644c70945552fb255d8751f65d1185c801e36b57281b43ae0c0",
-				"dweb:/ipfs/QmQUXANnaKM4PTUrZPLXo1RYuCqNAbYGNLdJF4hdh9wVjQ"
+				"bzz-raw://088f5e6fab76ab89ba27f2fc0b8303df76af1b8e05716af080f0ccf6c52a88bc",
+				"dweb:/ipfs/QmZoXCr1qbRpZV5jBRmC8GRbupiyRhjNMASXFzzRbosNhC"
 			]
 		}
 	},

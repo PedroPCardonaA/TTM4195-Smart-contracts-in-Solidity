@@ -327,7 +327,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
         uint8 _driverExperienceYears,
         uint8 _newContractDurationIndex,
         uint8 _mileageCapIndex
-    ) public notTerminated onlyCustomer {
+    ) public notTerminated onlyCustomer isLastMonth {
         company.transfer(downPayment);
         company.transfer(checkContractValue());
         carNFTContract.returnCarNFT(carId);

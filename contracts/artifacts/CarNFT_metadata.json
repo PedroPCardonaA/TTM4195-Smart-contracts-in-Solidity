@@ -757,7 +757,7 @@
 			}
 		],
 		"devdoc": {
-			"details": "The contract is owned and managed by the creator, enabling functions for car lifecycle management",
+			"details": "The contract is owned and managed by the creator, enabling functions for car lifecycle management.",
 			"errors": {
 				"ERC721IncorrectOwner(address,uint256,address)": [
 					{
@@ -845,10 +845,10 @@
 				},
 				"availableCarNFT(uint256)": {
 					"params": {
-						"carId": ": ID of the car to lease."
+						"carId": "ID of the car to check availability"
 					},
 					"returns": {
-						"_0": "whether the car is available to lease."
+						"_0": "Whether the car is available to lease"
 					}
 				},
 				"balanceOf(address)": {
@@ -924,9 +924,9 @@
 					"details": "See {IERC721-ownerOf}."
 				},
 				"reserve(uint256)": {
-					"details": "Set the corresponding availability boolean to false.",
+					"details": "Sets the corresponding availability boolean to false.",
 					"params": {
-						"carId": ": ID of the car to lease"
+						"carId": "ID of the car to reserve"
 					}
 				},
 				"returnCarNFT(uint256)": {
@@ -944,7 +944,7 @@
 					"details": "See {IERC721-setApprovalForAll}."
 				},
 				"setMileage(uint256,uint256)": {
-					"details": "Only the owner can set the mileage.",
+					"details": "Only the owner or the associated LeaseAgreement can set the mileage.",
 					"params": {
 						"_mileage": "The new mileage value to set",
 						"carId": "ID of the car to update mileage for"
@@ -1005,7 +1005,7 @@
 					"notice": "Mints a new car NFT"
 				},
 				"reserve(uint256)": {
-					"notice": "Reserve a car by its id, but only if it is available."
+					"notice": "Reserve a car by its ID, but only if it is available."
 				},
 				"returnCarNFT(uint256)": {
 					"notice": "Returns a leased car NFT back to the company."
@@ -1014,7 +1014,7 @@
 					"notice": "Sets the mileage for a specific car."
 				}
 			},
-			"notice": "The NFT is represented as a ERC721 token representing individual cars with attributes and ownership. This contract allows minting, leasing, returning, and updating car NFTs",
+			"notice": "The NFT is represented as an ERC721 token representing individual cars with attributes and ownership. This contract allows minting, leasing, returning, and updating car NFTs.",
 			"version": 1
 		}
 	},
@@ -1147,11 +1147,11 @@
 			]
 		},
 		"contracts/CarNFT.sol": {
-			"keccak256": "0x7f265f59454d3a19e31bbad3d419a2503496061589dead1a7f1002f7903e2997",
+			"keccak256": "0xef7569b86ee655524899af4bcf5c2db354167202177513cd5fc54c0a7dbac2d9",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://f6ed7f1b9073536a03aa8731d41d63c826adc014ba457aa2208c4a1e7aadd2f9",
-				"dweb:/ipfs/QmTyL845rnLixU3hhkr3i7ZuoytSbbiqi9eGtZeQXKiPFS"
+				"bzz-raw://106387cedd322d78d0f82392dd9b5cf4ddb5e01e5693d997aecd310de0d94887",
+				"dweb:/ipfs/QmQN9qXPMmXek1NsU819zyrgmT586dWLVDNF9SMfcBoSFx"
 			]
 		},
 		"contracts/structs/CarStruct.sol": {
