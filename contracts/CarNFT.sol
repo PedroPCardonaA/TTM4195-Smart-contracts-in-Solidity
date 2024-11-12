@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: MIT
+/*
+ChatGPT:
+Recommendations for possible functions
+Recommendations were not helpful for solidity in general
+Standardization of layouts  for the contracts
+*/
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
