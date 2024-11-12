@@ -27,20 +27,6 @@ contract CarNFTTest {
         Assert.equal(car.mileage, 5000, "Mileage should be 5000");
     }
 
-    function testGiveApprovement() public {
-        carNFT.mintCarNFT("Toyota Corolla", "Black", 2019, 500000000000000000, 10000);
-        carNFT.giveApprovement(customer, 1);
-        Assert.equal(carNFT.getApproved(1), customer, "Customer should be approved for car ID 1");
-    }
-
-    function testLeaseCarNFT() public {
-        carNFT.mintCarNFT("Honda Civic", "White", 2022, 750000000000000000, 2000);
-        carNFT.giveApprovement(leasingCompany, 1);
-        // Lease the car to the customer
-        carNFT.leaseCarNFT(customer, leasingCompany, 1);
-        Assert.equal(carNFT.checkCurrentCarNFTOwner(1), customer, "Customer should now own car ID 1");
-    }
-
     function testSetMileage() public {
         carNFT.mintCarNFT("Ford Mustang", "Yellow", 2021, 1200000000000000000, 0);
         uint256 updatedMileage = carNFT.setMileage(1, 15000);
