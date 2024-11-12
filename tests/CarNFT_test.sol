@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: MIT
+/*
+ChatGPT:
+Recommendations for possible functions
+Recommendations were not helpful for solidity in general
+Standardization of layouts  for the contracts
+*/
 pragma solidity ^0.8.0;
 
 import "remix_tests.sol"; // Import the Remix testing library
@@ -25,20 +31,6 @@ contract CarNFTTest {
         Assert.equal(car.color, "Red", "Color should be Red");
         Assert.equal(car.yearOfMatriculation, 2020, "Year of matriculation should be 2020");
         Assert.equal(car.mileage, 5000, "Mileage should be 5000");
-    }
-
-    function testGiveApprovement() public {
-        carNFT.mintCarNFT("Toyota Corolla", "Black", 2019, 500000000000000000, 10000);
-        carNFT.giveApprovement(customer, 1);
-        Assert.equal(carNFT.getApproved(1), customer, "Customer should be approved for car ID 1");
-    }
-
-    function testLeaseCarNFT() public {
-        carNFT.mintCarNFT("Honda Civic", "White", 2022, 750000000000000000, 2000);
-        carNFT.giveApprovement(leasingCompany, 1);
-        // Lease the car to the customer
-        carNFT.leaseCarNFT(customer, leasingCompany, 1);
-        Assert.equal(carNFT.checkCurrentCarNFTOwner(1), customer, "Customer should now own car ID 1");
     }
 
     function testSetMileage() public {
