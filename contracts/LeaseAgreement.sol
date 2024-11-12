@@ -32,6 +32,7 @@ contract LeaseAgreement is KeeperCompatibleInterface {
 
     // Deadline for deal registration
     uint256 private registrationDeadline;
+    
     // Time when the deal was confirmed by the company
     uint256 private confirmDate;
 
