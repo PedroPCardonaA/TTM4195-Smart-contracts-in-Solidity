@@ -315,13 +315,13 @@ contract LeaseAgreement is KeeperCompatibleInterface {
     }
 
     /**
-     * @notice Leases a new car under the same agreement.
-     * @dev Allows the customer to lease a new car.
+     * @notice Create a new lease after the old one with a new car.
+     * @dev The customer can extend the lease agreement with new parameters such as contract duration, driver experience years, and mileage cap.
      * @param _carID The ID of the new car
-     * @param _driverExperienceYears The customer's years of driving experience
+     * @param _driverExperienceYears Years of driving experience of the driver
      * @param _newContractDurationIndex The index of the new contract duration
-     * @param _mileageCapIndex The index of the new mileage cap
-     */
+     * @param _mileageCapIndex The index of the new mileage cap duration
+    */
     function leaseNewCar(
         uint256 _carID,
         uint8 _driverExperienceYears,
