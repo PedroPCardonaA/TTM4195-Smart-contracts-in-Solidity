@@ -191,41 +191,41 @@ contract CarNFT is ERC721 {
         uint8 driverExperienceYears,
         uint256 mileageCap,
         uint256 contractDuration
-    ) external pure returns (uint128) {
+    ) external pure returns (uint256) {
         uint256 mileageDiscount;
-        uint256 baseRate = originalValue / 100;
         if (currentMileage < 1000) {
             mileageDiscount = 0;
         } else if (currentMileage < 10000) {
-            mileageDiscount = (baseRate * 5) / 100;
+            mileageDiscount = 5;
         } else {
-            mileageDiscount = (baseRate * 20) / 100;
+            mileageDiscount = 20;
         }
-        uint256 experienceFactor = driverExperienceYears > 5 ? 0 : (baseRate * 3) / 100;
-        uint256 durationDiscount;
+
+        uint256 experienceFactor = driverExperienceYears > 5 ? 0 : 3;
+
+        uint256 durationDiscount = 0;
         if (contractDuration > 10) {
-            durationDiscount = (baseRate * 3) / 100;
+            durationDiscount = 3;
         } else if (contractDuration > 5) {
-            durationDiscount = (baseRate * 2) / 100;
+            durationDiscount = 2;
         } else if (contractDuration > 2) {
-            durationDiscount = (baseRate * 1) / 100;
+            durationDiscount = 1;
         } else {
             durationDiscount = 0;
         }
 
         uint256 mileageFee;
         if (mileageCap > 9000) {
-            mileageFee = (baseRate * 5) / 100;
+            mileageFee = 5;
         } else if (mileageCap > 6000) {
-            mileageFee = (baseRate * 3) / 100;
+            mileageFee = 3;
         } else if (mileageCap > 3000) {
-            mileageFee = (baseRate * 2) / 100;
+            mileageFee = 2;
         } else {
             mileageFee = 0;
         }
 
-        uint128 quota = uint128(baseRate - mileageDiscount + experienceFactor - durationDiscount + mileageFee);
-        return quota;
+        return originalValue * (100 - mileageDiscount - durationDiscount + experienceFactor + mileageFee) / 10000;
     }
 
     /**
