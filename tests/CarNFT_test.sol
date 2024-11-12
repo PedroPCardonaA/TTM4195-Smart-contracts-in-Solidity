@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: MIT
+/*
+ChatGPT:
+Recommendations for possible functions
+Recommendations were not helpful for solidity in general
+Standardization of layouts  for the contracts
+*/
 pragma solidity ^0.8.0;
 
 import "remix_tests.sol"; // Import the Remix testing library
